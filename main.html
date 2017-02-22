@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
 	<meta charset="UTF-8" />
-	<title>Phaser - Making your first game, part 1</title>
+	<title>CSCE 452 Project 1</title>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
     <style type="text/css">
         body {
@@ -14,27 +14,73 @@
 
 <script type="text/javascript">
 
+//sprites
+var ship;
+var orb;
+
+//controls
+var cursors;
+
+//mapping phaser game to var
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
+//done 1st, only once
 function preload() {
-    game.load.image('sky','assests/sky.png');
-    game.load.image('ground','assets/platform.png')
+    //load assets
     game.load.image('star','assets/star.png');
-    game.load.image('link1','assets/link1.png');
-    game.load.spritesheet('dude','assets/dude.png',32,48);
 }
 
+//done 2nd, only once
 function create() {
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    //set background color
+    game.stage.backgroundColor = '#001255';
 
-    links = game.add.group();
+    //adding ship sprite and setting its properties
+    ship = game.add.sprite(400, 300, 'star');
+    ship.anchor.setTo(0.5, 0.5);
+    game.physics.arcade.enable(ship);
 
-    links.enableBody = true;
-
-    links.create(0,0,'link1');
+    //adding orb sprite and setting its properties
+    orb = game.add.sprite(400, 300, 'star');
+    orb.anchor.setTo(0.5); //initial rotation axis is center of figure
+    orb.pivot.x = 50; //rotation radius
+    
+    //enable game input
+    cursors = game.input.keyboard.createCursorKeys();
 }
 
+//Done last, but run every screen refresh cycle (needs to be fast!)
 function update() {
+    
+    //stop sprite so it doesnt go off screen after you move it with keys
+    ship.body.velocity.x = 0; 
+    ship.body.velocity.y = 0;
+
+    //keyboard controls to move ship
+    if (cursors.left.isDown)
+    {
+        ship.body.velocity.x = -300;
+    }
+    else if (cursors.right.isDown)
+    {
+        ship.body.velocity.x = 300;
+    }
+
+    if (cursors.up.isDown)
+    {
+        ship.body.velocity.y = -300;
+    }
+    else if (cursors.down.isDown)
+    {
+        ship.body.velocity.y = 300;
+    }
+    
+    //makes sprite rotate around a specified point
+    orb.position.rotate(ship.x, ship.y, 2, true, 0); 
+    //arguments: axis of rotation(x, y), angle of rotation, true to enable, 0 for offset distance from axis of rotation
+    
+    orb.rotation += 0.05;//rotates by constant 0.05 degrees on update
+    
 }
 
 </script>
