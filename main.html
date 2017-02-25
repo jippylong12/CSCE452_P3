@@ -91,6 +91,9 @@ function create() {
     orb.anchor.setTo(0.5); //initial rotation axis is center of figure
     orb.pivot.x = 50; //rotation radius
 
+    //orb.anchor.setTo(0.5); //initial rotation axis is center of figure
+    //orb.pivot.x = 50; //rotation radius
+
     //enable game input
     cursors = game.input.keyboard.createCursorKeys();
 }
@@ -98,6 +101,8 @@ function create() {
 //Done last, but run every screen refresh cycle (needs to be fast!)
 function update() {
     
+    orb.position.rotate(ship.x, ship.y, 2, true, 0);
+
     //stop sprite so it doesnt go off screen after you move it with keys
     ship.body.velocity.x = 0; 
     ship.body.velocity.y = 0;
@@ -123,13 +128,15 @@ function update() {
     
     //makes sprite rotate around a specified point
     orb.position.rotate(ship.x, ship.y, 2, true, 0);
+    //orb.position.rotate(ship.x, ship.y, 2, true, 0);
     //arguments: axis of rotation(x, y), angle of rotation, true to enable, 0 for offset distance from axis of rotation
     
     orb.rotation += 0.05;//rotates by constant 0.05 degrees on update
     
 }
+
 function actionJoint1Clockwise () {
-    angle1	++;
+    angle1++;
 }
 
 function actionJoint1Ccw () {
@@ -151,7 +158,6 @@ function actionJoint3Clockwise () {
 function actionJoint3Ccw () {
     angle3--;
 }
-
 
 </script>
 
