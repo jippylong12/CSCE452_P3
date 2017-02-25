@@ -4,6 +4,7 @@
 	<meta charset="UTF-8" />
 	<title>CSCE 452 Project 1</title>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
+	<script type="text/javascript" src="js/math.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -35,6 +36,41 @@ var joint3_ccw;
  var angle1;
  var angle2;
  var angle3;
+ 
+ 
+function degToRad(degrees){
+    var rad;
+    return rad =degrees*math.PI/180;
+}
+
+// Calculate the transformation matrix for the axis (theta is in rads)
+function transAxis1(theta1){
+    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    
+    var transform_matrix = transform_matrix1;
+    
+    return transform_matrix;
+}
+
+function transAxis2(theta1, theta2){
+    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.cos(theta2), 0, 150], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    
+    var transform_matrix = math.multiply(transform_matrix1,transform_matrix2);
+    
+    return transform_matrix;
+}
+
+function transAxis3(theta1, theta2, theta3){
+    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.cos(theta2), 0, 150], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.cos(theta3), 0, 100], [math.sin(theta3), math.cos(theta3), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    
+    var transform_matrix = math.multiply(transform_matrix1,transform_matrix2, transform_matrix3);
+    
+    return transform_matrix;
+}
+
 
 //mapping phaser game to var
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update });
@@ -85,6 +121,7 @@ function create() {
     
     //enable game input
     cursors = game.input.keyboard.createCursorKeys();
+    
 }
 
 //Done last, but run every screen refresh cycle (needs to be fast!)
