@@ -22,6 +22,10 @@ var orb;
 //controls
 var cursors;
 
+//background images
+var controlPanelBackground;
+var controlPanelText;
+
 //buttons
 var joint1_clockwise;
 var joint1_ccw;
@@ -80,16 +84,18 @@ function preload() {
     //load assets
 
     //Assets for buttons
-    game.load.image('joint1_clockwise','assets/arrow_rotate_clockwise.png');
-    game.load.image('joint1_ccw','assets/arrow_rotate_counterclockwise.png');
+    game.load.spritesheet('joint1_clockwise','assets/arrow_rotate_clockwise_spritesheet.png',75,75,2);
+    game.load.spritesheet('joint1_ccw','assets/arrow_rotate_counterclockwise_spritesheet.png',75,75,2);
 
-    game.load.image('joint2_clockwise','assets/arrow_rotate_clockwise.png');
-    game.load.image('joint2_ccw','assets/arrow_rotate_counterclockwise.png');
+    game.load.spritesheet('joint2_clockwise','assets/arrow_rotate_clockwise_spritesheet.png',75,75,2);
+    game.load.spritesheet('joint2_ccw','assets/arrow_rotate_counterclockwise_spritesheet.png',75,75,2);
 
-    game.load.image('joint3_clockwise','assets/arrow_rotate_clockwise.png');
-    game.load.image('joint3_ccw','assets/arrow_rotate_counterclockwise.png');
+    game.load.spritesheet('joint3_clockwise','assets/arrow_rotate_clockwise_spritesheet.png',75,75,2);
+    game.load.spritesheet('joint3_ccw','assets/arrow_rotate_counterclockwise_spritesheet.png',75,75,2);
 
     game.load.image('star','assets/star.png');
+    //background
+    game.load.image('controlPanelBackground','assets/controlPanelBackground.png');
 
     angle1 = 0; angle2 = 0; angle3 =0;
 }
@@ -99,15 +105,23 @@ function create() {
     //set background color
     game.stage.backgroundColor = '#001255';
 
+    controlPanelBackground = game.add.sprite(game.world.centerX + 425,0,'controlPanelBackground');
+    controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+
+    //link text
+    var link1Text = game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+    var link2Text = game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+    var link3Text = game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+
     //buttons
-    joint1_clockwise = game.add.button(game.world.centerX + 525, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 2,1,0);
-    joint1_ccw = game.add.button(game.world.centerX + 375, 50, 'joint1_ccw', actionJoint1Ccw, this, 2,1,0);
+    joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
+    joint1_ccw = game.add.button(game.world.centerX + 475, 50, 'joint1_ccw', actionJoint1Ccw, this, 0,0,1,0);
 
-    joint2_clockwise = game.add.button(game.world.centerX + 525, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 2,1,0);
-    joint2_ccw = game.add.button(game.world.centerX + 375, 150, 'joint2_ccw', actionJoint2Ccw, this, 2,1,0);
+    joint2_clockwise = game.add.button(game.world.centerX + 565, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 0,0,1,0);
+    joint2_ccw = game.add.button(game.world.centerX + 475, 150, 'joint2_ccw', actionJoint2Ccw, this, 0,0,1,0);
 
-    joint3_clockwise = game.add.button(game.world.centerX + 525, 250, 'joint3_clockwise', actionJoint3Clockwise, this, 2,1,0);
-    joint3_ccw = game.add.button(game.world.centerX + 375, 250, 'joint3_ccw', actionJoint3Ccw, this, 2,1,0);
+    joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
+    joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
 
     //adding ship sprite and setting its properties
     ship = game.add.sprite(400, 300, 'star');
@@ -116,9 +130,12 @@ function create() {
 
     //adding orb sprite and setting its properties
     orb = game.add.sprite(400, 300, 'star');
+    orb.anchor.setTo(0.5); //initial rotation axis is center of figure
+    orb.pivot.x = 50; //rotation radius
+
     //orb.anchor.setTo(0.5); //initial rotation axis is center of figure
     //orb.pivot.x = 50; //rotation radius
-    
+
     //enable game input
     cursors = game.input.keyboard.createCursorKeys();
     
@@ -127,8 +144,8 @@ function create() {
 //Done last, but run every screen refresh cycle (needs to be fast!)
 function update() {
     
-    orb.position.rotate(ship.x, ship.y, 2, true, 0); 
-    
+    orb.position.rotate(ship.x, ship.y, 2, true, 0);
+
     //stop sprite so it doesnt go off screen after you move it with keys
     ship.body.velocity.x = 0; 
     ship.body.velocity.y = 0;
@@ -153,9 +170,9 @@ function update() {
     }
     
     //makes sprite rotate around a specified point
-    //orb.position.rotate(ship.x, ship.y, 2, true, 0); 
+    orb.position.rotate(ship.x, ship.y, 2, true, 0);
+    //orb.position.rotate(ship.x, ship.y, 2, true, 0);
     //arguments: axis of rotation(x, y), angle of rotation, true to enable, 0 for offset distance from axis of rotation
-
     
     orb.rotation += 0.05;//rotates by constant 0.05 degrees on update
     
