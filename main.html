@@ -71,15 +71,21 @@ function create() {
 
     controlPanelBackground = game.add.sprite(game.world.centerX + 425,0,'controlPanelBackground');
     controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+
+    //link text
+    var link1Text = game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+    var link2Text = game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+    var link3Text = game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+
     //buttons
-    joint1_clockwise = game.add.button(game.world.centerX + 550, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
-    joint1_ccw = game.add.button(game.world.centerX + 450, 50, 'joint1_ccw', actionJoint1Ccw, this, 0,0,1,0);
+    joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
+    joint1_ccw = game.add.button(game.world.centerX + 475, 50, 'joint1_ccw', actionJoint1Ccw, this, 0,0,1,0);
 
-    joint2_clockwise = game.add.button(game.world.centerX + 550, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 0,0,1,0);
-    joint2_ccw = game.add.button(game.world.centerX + 450, 150, 'joint2_ccw', actionJoint2Ccw, this, 0,0,1,0);
+    joint2_clockwise = game.add.button(game.world.centerX + 565, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 0,0,1,0);
+    joint2_ccw = game.add.button(game.world.centerX + 475, 150, 'joint2_ccw', actionJoint2Ccw, this, 0,0,1,0);
 
-    joint3_clockwise = game.add.button(game.world.centerX + 550, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
-    joint3_ccw = game.add.button(game.world.centerX + 450, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
+    joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
+    joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
 
     //adding ship sprite and setting its properties
     ship = game.add.sprite(400, 300, 'star');
