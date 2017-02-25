@@ -144,6 +144,21 @@ function create() {
 //Done last, but run every screen refresh cycle (needs to be fast!)
 function update() {
     
+    //update sprite positions here:
+    //link1m describes position of link axis
+    var link1m = math.matrix([link1.x, link1.y, 0, 1]);
+    
+    //link1t describes transform operator to move the axis to a new position
+    var link1t = math.multiply(transAxis1(theta1), link1m); //theta 1 is global
+    
+    link1.x = link1t[0];
+    link1.y = link1t[1];
+    
+    // Now apply rotation to link by theta
+    link1.angle(theta1);
+    
+    
+    
     orb.position.rotate(ship.x, ship.y, 2, true, 0);
 
     //stop sprite so it doesnt go off screen after you move it with keys
