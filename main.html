@@ -51,17 +51,30 @@ function degToRad(degrees){
 }
 
 // Calculate the transformation matrix for the axis (theta is in rads)
-function transAxis1(theta1){
-    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+function transAxis1(theta1, theta2){
+    theta1 = degToRad(theta1);
     
-    var transform_matrix = transform_matrix1;
+    var world_translation = math.matrix([[1,0,0,582],[0,1,0,674],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
+    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta1), math.cos(theta1), 0, -150], [0,0,1,0], [0,0,0,1]]);
+    
+    var transform_matrix = math.multiply(world_translation,transform_matrix1);
+    transform_matrix = math.multiply(transform_matrix,transform_matrix2);
+    
+    console.log("TRANSFORM MATRIX: ");
+    transform_matrix.forEach(function (value, index, matrix) {
+        console.log('value:', value, 'index:', index);
+    });
     
     return transform_matrix;
 }
-
+/*
 function transAxis2(theta1, theta2){
+    theta1 = degToRad(theta1);
+    theta2 = degToRad(theta2);
+    
     var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.cos(theta2), 0, 150], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,150], [0,0,0,1]]);
     
     var transform_matrix = math.multiply(transform_matrix1,transform_matrix2);
     
@@ -69,18 +82,45 @@ function transAxis2(theta1, theta2){
 }
 
 function transAxis3(theta1, theta2, theta3){
+    theta1 = degToRad(theta1);
+    theta2 = degToRad(theta2);
+    theta3 = degToRad(theta3);
+    
     var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.cos(theta2), 0, 150], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.cos(theta3), 0, 100], [math.sin(theta3), math.cos(theta3), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,150], [0,0,0,1]]);
+    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 0], [math.sin(theta3), math.cos(theta3), 0, 0], [0,0,1,100], [0,0,0,1]]);
     
     var transform_matrix = math.multiply(transform_matrix1,transform_matrix2, transform_matrix3);
     
     return transform_matrix;
+}*/
+
+function updateSprites(){
+    console.log("link2.x: " + link2.x + "link2.y: " + link2.y);
+   var link1m = math.matrix([link2.x, link2.y, 0, 1]);
+    
+    //link1t describes transform operator to move the axis to a new position
+    var link1t = math.multiply(transAxis1(angle1, angle2), link1m); //angle1 is global
+    
+    link2.x = link1t.get([0]); 
+    link2.y = link1t.get([1]);
+    
+    // Now apply rotation to link by theta
+    link1.angle = angle1; 
+    
+    console.log("link1t MATRIX: ");
+    link1t.forEach(function (value, index, matrix) {
+        console.log('value:', value, 'index:', index);
+    });
+    
+    console.log("link2.x: " + link2.x + "link2.y: " + link2.y);
+    
+    
+    
 }
 
-
 //mapping phaser game to var
-var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
 
 //done 1st, only once
 function preload() {
@@ -102,13 +142,13 @@ function preload() {
     game.load.image('link1','assets/link1.png');
     game.load.image('link2','assets/link2.png');
     game.load.image('link3','assets/link3.png');
-    angle1 = 0; angle2 = 0; angle3 =0;
+    angle1 = 0; angle2 =0; angle3 =0;
 }
 
 //done 2nd, only once
 function create() {
     //set background color
-    game.stage.backgroundColor = '#001255';
+    game.stage.backgroundColor = '#5cb2e0';
 
     controlPanelBackground = game.add.sprite(game.world.centerX + 425,0,'controlPanelBackground');
     controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
@@ -133,71 +173,106 @@ function create() {
     // all the sprites need to be the same width to avoid differenes in shift values
     // to calculate the y difference, you start with the height, subtract the height of the sprite, then subtract the
     // height to the matching center you are trying to link
-    link1 = game.add.sprite(game.world.centerX - 108, game.world.height - 200 - 46, 'link1');
-    link2 = game.add.sprite(game.world.centerX - 108, game.world.height - 150 - 46 - 150, 'link2');
+    link1 = game.add.sprite(game.world.centerX - 108 + 50, game.world.height - 200 - 46 + 200, 'link1');
+    //link2 = game.add.sprite(game.world.centerX - 108, game.world.height - 46 - 150, 'link2');
+    link2 = game.add.sprite(0, 0, 'link2');
     link3 = game.add.sprite(game.world.centerX - 108, game.world.height - 150 - 46 - 150 - 50, 'link3');
     baseOfChampions = game.add.sprite(game.world.centerX - 108,game.world.height - 75, 'baseOfChampions');
+    
+    //setting reference anchor for all links in bottom center
+    link1.anchor.x = 0.5;
+    link1.anchor.y = 1;
 
-
-
-    //adding ship sprite and setting its properties
-    //ship = game.add.sprite(400, 300, 'star');
-    //ship.anchor.setTo(0.5, 0.5);
-    //game.physics.arcade.enable(ship);
-
-    //adding orb sprite and setting its properties
-    //orb = game.add.sprite(400, 300, 'star');
-    //orb.anchor.setTo(0.5); //initial rotation axis is center of figure
-    //orb.pivot.x = 50; //rotation radius
-
-    //orb.anchor.setTo(0.5); //initial rotation axis is center of figure
-    //orb.pivot.x = 50; //rotation radius
+    
+    link2.anchor.x = 0.5;
+    link2.anchor.y = 1;
+    //link2.x = game.world.centerX - 108 + 50;
+    //link2.y = game.world.height - 196;
+    /*
+    
+    link3.anchor.x = 0.5;
+    link3.anchor.y = 1;*/
 
     //enable game input
     cursors = game.input.keyboard.createCursorKeys();
+    
+    updateSprites();
     
 }
 
 //Done last, but run every screen refresh cycle (needs to be fast!)
 function update() {
-    
-<<<<<<< HEAD
+
+
+
     //update sprite positions here:
     //link1m describes position of link axis
-    var link1m = math.matrix([link1.x, link1.y, 0, 1]);
+    
+    
+    /*
+    var link2m = math.matrix([link2.x, link2.y, 0, 1]);
     
     //link1t describes transform operator to move the axis to a new position
-    var link1t = math.multiply(transAxis1(theta1), link1m); //theta 1 is global
+    var link2t = math.multiply(transAxis2(angle1, angle2), link2m); //angle1 is global
     
-    link1.x = link1t[0];
-    link1.y = link1t[1];
+    link3.x = link2t.get([0]); 
+    link3.y = link2t.get([1]);
     
     // Now apply rotation to link by theta
-    link1.angle(theta1);
+    link2.angle = angle1;*/
 }
 
+
+function render() {
+
+    // Sprite debug info
+    game.debug.spriteInfo(link2, 32, 32);
+    game.debug.spriteInfo(link1, 100, 100);
+
+}
+
+
+
 function actionJoint1Clockwise () {
-    angle1++;
+    
+    if(angle1 <= 90){
+        angle1++;
+        
+        updateSprites();
+    }
 }
 
 function actionJoint1Ccw () {
+    
+    if(angle1 <= -90){
     angle1--;
+    
+    updateSprites();
+    }
 }
 
 function actionJoint2Clockwise () {
     angle2++;
+    
+    updateSprites();
 }
 
 function actionJoint2Ccw () {
     angle2--;
+    
+    updateSprites();
 }
 
 function actionJoint3Clockwise () {
     angle3++;
+    
+    updateSprites();
 }
 
 function actionJoint3Ccw () {
     angle3--;
+    
+    updateSprites();
 }
 
 </script>
