@@ -25,8 +25,16 @@ var cursors;
 var joint1_clockwise;
 var joint1_ccw;
 
+var joint2_clockwise;
+var joint2_ccw;
+
+var joint3_clockwise;
+var joint3_ccw;
+
 //angle values
  var angle1;
+ var angle2;
+ var angle3;
 
 //mapping phaser game to var
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update });
@@ -34,13 +42,20 @@ var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, creat
 //done 1st, only once
 function preload() {
     //load assets
-	//game.load.image('arrow_ccw','assets/arrow_rotate_counterclockwise.png');
+
+    //Assets for buttons
     game.load.image('joint1_clockwise','assets/arrow_rotate_clockwise.png');
     game.load.image('joint1_ccw','assets/arrow_rotate_counterclockwise.png');
 
+    game.load.image('joint2_clockwise','assets/arrow_rotate_clockwise.png');
+    game.load.image('joint2_ccw','assets/arrow_rotate_counterclockwise.png');
+
+    game.load.image('joint3_clockwise','assets/arrow_rotate_clockwise.png');
+    game.load.image('joint3_ccw','assets/arrow_rotate_counterclockwise.png');
+
     game.load.image('star','assets/star.png');
 
-    angle1 = 0;
+    angle1 = 0; angle2 = 0; angle3 =0;
 }
 
 //done 2nd, only once
@@ -49,8 +64,14 @@ function create() {
     game.stage.backgroundColor = '#001255';
 
     //buttons
-    joint1_clockwise = game.add.button(game.world.centerX + 350, 25, 'joint1_clockwise', actionJoint1Clockwise, this, 2,1,0);
-    joint1_ccw = game.add.button(game.world.centerX + 500, 25, 'joint1_ccw', actionJoint1Ccw, this, 2,1,0);
+    joint1_clockwise = game.add.button(game.world.centerX + 525, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 2,1,0);
+    joint1_ccw = game.add.button(game.world.centerX + 375, 50, 'joint1_ccw', actionJoint1Ccw, this, 2,1,0);
+
+    joint2_clockwise = game.add.button(game.world.centerX + 525, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 2,1,0);
+    joint2_ccw = game.add.button(game.world.centerX + 375, 150, 'joint2_ccw', actionJoint2Ccw, this, 2,1,0);
+
+    joint3_clockwise = game.add.button(game.world.centerX + 525, 250, 'joint3_clockwise', actionJoint3Clockwise, this, 2,1,0);
+    joint3_ccw = game.add.button(game.world.centerX + 375, 250, 'joint3_ccw', actionJoint3Ccw, this, 2,1,0);
 
     //adding ship sprite and setting its properties
     ship = game.add.sprite(400, 300, 'star');
@@ -101,14 +122,27 @@ function update() {
 }
 
 function actionJoint1Clockwise () {
-
     angle1++;
-
 }
 
 function actionJoint1Ccw () {
-
     angle1--;
+}
+
+function actionJoint2Clockwise () {
+    angle2++;
+}
+
+function actionJoint2Ccw () {
+    angle2--;
+}
+
+function actionJoint3Clockwise () {
+    angle3++;
+}
+
+function actionJoint3Ccw () {
+    angle3--;
 }
 
 </script>
