@@ -78,10 +78,10 @@ function transAxis2(theta1, theta2, theta3){
     var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, -150], [0,0,1,0], [0,0,0,1]]);
     var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 0], [math.sin(theta3), math.cos(theta3), 0, -100], [0,0,1,0], [0,0,0,1]]);
     
-    var temp_matrix = math.multiply(world_translation,transform_matrix1);
+    var temp_matrix  = math.multiply(world_translation, transform_matrix1);
     var temp_matrix2 = math.multiply(transform_matrix2, transform_matrix3);
 
-   return math.multiply(temp_matrix, temp_matrix2);
+    return math.multiply(temp_matrix, temp_matrix2);
 }
  /*
 function transAxis3(theta1, theta2, theta3){
@@ -113,7 +113,6 @@ function updateSprites(){
     link1.angle = angle1;
     link2.angle = angle2;
     link3.angle = angle3;
-
 }
 
 //mapping phaser game to var
@@ -132,6 +131,8 @@ function preload() {
 
     game.load.spritesheet('joint3_clockwise','assets/arrow_rotate_clockwise_spritesheet.png',75,75,2);
     game.load.spritesheet('joint3_ccw','assets/arrow_rotate_counterclockwise_spritesheet.png',75,75,2);
+
+    game.load.spritesheet('paint', 'assets/Paint.png',250,250,2);
     //background
     game.load.image('controlPanelBackground','assets/controlPanelBackground.png');
     //base
@@ -147,12 +148,12 @@ function create() {
     game.stage.backgroundColor = '#5cb2e0';
 
     controlPanelBackground = game.add.sprite(game.world.centerX + 425,0,'controlPanelBackground');
-    controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+    controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
     //link text
-    var link1Text = game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
-    var link2Text = game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
-    var link3Text = game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Times New Romans", fill: "#dd91ff", align: "center" });
+    var link1Text = game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    var link2Text = game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    var link3Text = game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
     //buttons
     joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
@@ -163,6 +164,8 @@ function create() {
 
     joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
     joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
+
+    var button = game.add.button(game.world.centerX + 400, game.world.height - 250, 'paint', actionPaint, this, 0,0,1,0);
 
     //loading links
 	// the control panel makes the robot look off center so we have to shift to the left
@@ -260,6 +263,10 @@ function actionJoint3Ccw () {
     angle3--;
     
     updateSprites();
+}
+
+function actionPaint(){
+    // paint to the screen
 }
 
 </script>
