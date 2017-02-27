@@ -28,6 +28,7 @@ var controlPanelText;
 
 //robot sprites
 var baseOfChampions;
+var easel;
 var link1;
 var link2;
 var link3;
@@ -63,6 +64,7 @@ var joint4 = math.matrix([0,0,0,1]);
 
 //detertimines whether to paint or not
 var paintToggle = false;
+var Paintcolor;
 
 //-----------------------------------------------------------------------------
 //Kinematics Functions
@@ -155,7 +157,7 @@ function updateSprites(){
     //if paint is on paint at end effector
     if(paintToggle == true){
         //if paint button is pressed:
-        graphics.beginFill(0xFF0000, 1); //red circle
+        graphics.beginFill(Paintcolor, 1); //red circle
         graphics.drawCircle(endEffectorX, endEffectorY, 10); //x, y, diam
     }
 }
@@ -183,8 +185,18 @@ function preload() {
     game.load.spritesheet('joint3_ccw','assets/arrow_rotate_counterclockwise_spritesheet.png',75,75,2);
 
     game.load.spritesheet('paint', 'assets/Paint.png',250,250,2);
+
+    //colors
+    game.load.spritesheet('color_red','assets/colors/red.png',100,100,2);
+    game.load.spritesheet('color_orange','assets/colors/orange.png',100,100,2);
+    game.load.spritesheet('color_yellow','assets/colors/yellow.png',100,100,2);
+    game.load.spritesheet('color_green','assets/colors/green.png',100,100,2);
+    game.load.spritesheet('color_blue','assets/colors/blue.png',100,100,2);
+    game.load.spritesheet('color_purple','assets/colors/purple.png',100,100,2);
+
     //background
     game.load.image('controlPanelBackground','assets/controlPanelBackground.png');
+    game.load.image('easel','assets/easel.png');
     //base
     game.load.image('baseOfChampions','assets/baseOfChampions.png');
     game.load.image('link1','assets/link1.png');
@@ -196,6 +208,10 @@ function preload() {
 function create() {
     //set background color
     game.stage.backgroundColor = '#5cb2e0';
+
+    easel = game.add.sprite(game.world.centerX-60, game.world.centerY-50, 'easel');
+    easel.anchor.x = 0.5;
+    easel.anchor.y = 0.5;
 
     controlPanelBackground = game.add.sprite(game.world.centerX + 425,0,'controlPanelBackground');
     controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Arial", fill: "#7810B7", align: "center" });
@@ -217,16 +233,25 @@ function create() {
 
     paintButton = game.add.button(game.world.centerX + 400, game.world.height - 250, 'paint', actionPaint, this, 0,0,1,0);
 
+    var button_red =    game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
+    var button_orange = game.add.button(130,130, 'color_orange', selectOrange, this, 0,0,1,0);
+    var button_yellow = game.add.button(30,230, 'color_yellow', selectYellow, this, 0,0,1,0);
+    var button_green =  game.add.button(130,330, 'color_green', selectGreen, this, 0,0,1,0);
+    var button_blue =   game.add.button(30,430, 'color_blue', selectBlue, this, 0,0,1,0);
+    var button_purple = game.add.button(130,530, 'color_purple', selectPurple, this, 0,0,1,0);
+
+
     //loading links
 	// the control panel makes the robot look off center so we have to shift to the left
     // all the sprites need to be the same width to avoid differences in shift values
     // to calculate the y difference, you start with the height, subtract the height of the sprite, then subtract the
     // height to the matching center you are trying to link
-    link1 = game.add.sprite(game.world.centerX - 108 + 50, game.world.height - 200 - 46 + 200, 'link1');
 
+    link1 = game.add.sprite(game.world.centerX - 108 + 50, game.world.height - 200 - 46 + 200, 'link1');
+    //link1 = game.add.sprite(0, 0, 'link1');
     link2 = game.add.sprite(0, 0, 'link2');
     link3 = game.add.sprite(0, 0, 'link3');
-    //link3 = game.add.sprite(game.world.centerX - 108, game.world.height - 150 - 46 - 150 - 50, 'link3');
+
     baseOfChampions = game.add.sprite(game.world.centerX - 108,game.world.height - 75, 'baseOfChampions');
     
     //setting reference anchor for all links in bottom center point
@@ -291,6 +316,25 @@ function actionJoint3Ccw () {
 function actionPaint(){
     // toggle paint functionality
     paintToggle = !paintToggle;
+}
+
+function selectRed(){
+    Paintcolor = 0xFF0000;
+}
+function selectOrange(){
+    Paintcolor = 0xFF6A00;
+}
+function selectYellow(){
+    Paintcolor = 0xFFD800;
+}
+function selectGreen(){
+    Paintcolor = 0x007F0E;
+}
+function selectBlue(){
+    Paintcolor = 0x0026FF;
+}
+function selectPurple(){
+    Paintcolor = 0x57007F;
 }
 
 </script>
