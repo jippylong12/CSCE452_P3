@@ -15,6 +15,10 @@
 
 <script type="text/javascript">
 
+//-----------------------------------------------------------------------------
+//Global Variables
+//-----------------------------------------------------------------------------
+
 //controls
 var cursors;
 
@@ -22,12 +26,15 @@ var cursors;
 var controlPanelBackground;
 var controlPanelText;
 
-//robot images
+//robot sprites
 var baseOfChampions;
 var link1;
 var link2;
 var link3;
-var endAffector;
+
+//end Effector position coords (didnt want to map to sprite)
+var endEffectorX = 0;
+var endEffectorY = 0;
 
 //buttons
 var joint1_clockwise;
@@ -39,6 +46,10 @@ var joint2_ccw;
 var joint3_clockwise;
 var joint3_ccw;
 
+//handles painting
+var paintButton;
+var graphics;
+
 //angle values
  var angle1=0;
  var angle2=0;
@@ -48,12 +59,21 @@ var joint3_ccw;
 var joint1 = math.matrix([0,0,0,1]);
 var joint2 = math.matrix([0,0,0,1]);
 var joint3 = math.matrix([0,0,0,1]);
- 
+var joint4 = math.matrix([0,0,0,1]);
+
+//detertimines whether to paint or not
+var paintToggle = false;
+
+//-----------------------------------------------------------------------------
+//Kinematics Functions
+//----------------------------------------------------------------------------- 
+
+//helper function to convert from degrees to radians
 function degToRad(degrees){
     return degrees*math.PI/180;
 }
 
-// Calculate the transformation matrix for the axis (theta is in rads)
+// Calculate the transformation matrix for the link2 axis position (theta is in rads)
 function transAxis1(theta1, theta2){
     theta1 = degToRad(theta1);
     theta2 = degToRad(theta2);
@@ -68,6 +88,7 @@ function transAxis1(theta1, theta2){
     return transform_matrix;
 }
 
+// Calculate the transformation matrix for the link3 axis position (theta is in rads)
 function transAxis2(theta1, theta2, theta3){
     theta1 = degToRad(theta1);
     theta2 = degToRad(theta2);
@@ -83,42 +104,71 @@ function transAxis2(theta1, theta2, theta3){
 
     return math.multiply(temp_matrix, temp_matrix2);
 }
- /*
+
+// Calculate the transformation matrix for the end effector position (theta is in rads)
 function transAxis3(theta1, theta2, theta3){
     theta1 = degToRad(theta1);
     theta2 = degToRad(theta2);
     theta3 = degToRad(theta3);
-    
+
+    var world_translation = math.matrix([[1,0,0,582],[0,1,0,654],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
     var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,150], [0,0,0,1]]);
-    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 0], [math.sin(theta3), math.cos(theta3), 0, 0], [0,0,1,100], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, -150], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 0], [math.sin(theta3), math.cos(theta3), 0, -100], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix4 = math.matrix([[1, 0, 0, 0], [0, 1, 0, -75], [0,0,1,0], [0,0,0,1]]);
     
-    var transform_matrix = math.multiply(transform_matrix1,transform_matrix2, transform_matrix3);
-    
-    return transform_matrix;
-}*/
+    //unfortunately only supports multiplying two matricies at a time
+    var temp_matrix  = math.multiply(world_translation, transform_matrix1);
+    temp_matrix = math.multiply(temp_matrix, transform_matrix2);
+    temp_matrix = math.multiply(temp_matrix, transform_matrix3);
+    temp_matrix = math.multiply(temp_matrix, transform_matrix4);
 
+    return temp_matrix;
+}
+
+//wrapper function for axis calculations and rotations
 function updateSprites(){
-    //link1t describes transform operator to move the axis to a new position
-    var link2t = math.multiply(transAxis1(angle1, angle2), joint2); //angle1 is global
+    //link2t(emp) describes transform operator to move the link2 axis to a new position
+    var link2t = math.multiply(transAxis1(angle1, angle2), joint2); //angles are global and controlled by buttons
 
+    //after calculation do assignment to sprite position
     link2.x = link2t.get([0]);
     link2.y = link2t.get([1]);
 
+    //same transfrom for link3 axis
     var link3t = math.multiply(transAxis2(angle1, angle2, angle3), joint3);
 
     link3.x = link3t.get([0]);
     link3.y = link3t.get([1]);
+    
+    //same transform for endEffector
+    var EEt = math.multiply(transAxis3(angle1, angle2, angle3), joint4);
+    
+    endEffectorX = EEt.get([0]);
+    endEffectorY = EEt.get([1]);
 
+    //adjusting angle to make sure orientation matches as expected
     link1.angle = angle1;
     link2.angle = angle2;
     link3.angle = angle3;
+    
+    //if paint is on paint at end effector
+    if(paintToggle == true){
+        //if paint button is pressed:
+        graphics.beginFill(0xFF0000, 1); //red circle
+        graphics.drawCircle(endEffectorX, endEffectorY, 10); //x, y, diam
+    }
 }
+
+
+//-----------------------------------------------------------------------------
+//Phaser Game Functionality
+//-----------------------------------------------------------------------------
 
 //mapping phaser game to var
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
 
-//done 1st, only once
+//preload assets needed for game
 function preload() {
     //load assets
 
@@ -142,7 +192,7 @@ function preload() {
     game.load.image('link3','assets/link3.png');
 }
 
-//done 2nd, only once
+//actually add assets in appropriate position, also set anchors for rotation axis references
 function create() {
     //set background color
     game.stage.backgroundColor = '#5cb2e0';
@@ -165,7 +215,7 @@ function create() {
     joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
     joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
 
-    var button = game.add.button(game.world.centerX + 400, game.world.height - 250, 'paint', actionPaint, this, 0,0,1,0);
+    paintButton = game.add.button(game.world.centerX + 400, game.world.height - 250, 'paint', actionPaint, this, 0,0,1,0);
 
     //loading links
 	// the control panel makes the robot look off center so we have to shift to the left
@@ -179,12 +229,12 @@ function create() {
     //link3 = game.add.sprite(game.world.centerX - 108, game.world.height - 150 - 46 - 150 - 50, 'link3');
     baseOfChampions = game.add.sprite(game.world.centerX - 108,game.world.height - 75, 'baseOfChampions');
     
-    //setting reference anchor for all links in bottom center
+    //setting reference anchor for all links in bottom center point
     link1.anchor.x = 0.5;
-    link1.anchor.y = 1;
+    link1.anchor.y = 180/200; //to adjust for where axis appears to be
     
     link2.anchor.x = 0.5;
-    link2.anchor.y = 0.8;
+    link2.anchor.y = 125/150;
 
     link3.anchor.x = 0.5;
     link3.anchor.y = 0.8;
@@ -193,80 +243,54 @@ function create() {
     cursors = game.input.keyboard.createCursorKeys();
     
     updateSprites();
+    
+    //enable graphics for paint brush
+    graphics = game.add.graphics(0, 0);
 }
 
-//Done last, but run every screen refresh cycle (needs to be fast!)
-function update() {
+//needed for compilation, functionality moved to button and updateSprites() function
+function update() {}
 
+//needed for debugging info
+function render() {}
 
-
-    //update sprite positions here:
-    //link1m describes position of link axis
-    
-    
-    /*
-    var link2m = math.matrix([link2.x, link2.y, 0, 1]);
-    
-    //link1t describes transform operator to move the axis to a new position
-    var link2t = math.multiply(transAxis2(angle1, angle2), link2m); //angle1 is global
-    
-    link3.x = link2t.get([0]); 
-    link3.y = link2t.get([1]);
-    
-    // Now apply rotation to link by theta
-    link2.angle = angle1;*/
-}
-
-
-function render() {
-
-    // Sprite debug info
-    game.debug.spriteInfo(link2, 32, 32);
-    game.debug.spriteInfo(link1, 100, 100);
-}
-
-
+//-----------------------------------------------------------------------------
+//Button Functions 
+//-----------------------------------------------------------------------------
 
 function actionJoint1Clockwise () {
-   // if(angle1 <= 90){
-        angle1++;
-        updateSprites();
-   // }
+    angle1 += 3;
+    updateSprites();
 }
 
 function actionJoint1Ccw () {
-   // if(-90 < angle1){
-        angle1--;
-        updateSprites();
-   // }
+    angle1 -= 3;
+    updateSprites();
 }
 
 function actionJoint2Clockwise () {
-    angle2++;
-    
+    angle2+= 3;
     updateSprites();
 }
 
 function actionJoint2Ccw () {
-    angle2--;
-    
+    angle2-= 3;
     updateSprites();
 }
 
 function actionJoint3Clockwise () {
-    angle3++;
-    
+    angle3+= 3;
     updateSprites();
 }
 
 function actionJoint3Ccw () {
-    angle3--;
-    
+    angle3-= 3;
     updateSprites();
 }
 
 function actionPaint(){
-    // paint to the screen
+    // toggle paint functionality
+    paintToggle = !paintToggle;
 }
 
 </script>
