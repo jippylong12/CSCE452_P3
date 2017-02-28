@@ -78,6 +78,7 @@ function transAxis1(theta1, theta2){
     theta1 = degToRad(theta1);
     theta2 = degToRad(theta2);
     
+    //has to be redone each time because theta is constantly changing
     var world_translation = math.matrix([[1,0,0,582],[0,1,0,654],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
     var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
     var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, -150], [0,0,1,0], [0,0,0,1]]);
@@ -223,10 +224,8 @@ function create() {
     // to calculate the y difference, you start with the height, subtract the height of the sprite, then subtract the
     // height to the matching center you are trying to link
     link1 = game.add.sprite(game.world.centerX - 108 + 50, game.world.height - 200 - 46 + 200, 'link1');
-
     link2 = game.add.sprite(0, 0, 'link2');
     link3 = game.add.sprite(0, 0, 'link3');
-    //link3 = game.add.sprite(game.world.centerX - 108, game.world.height - 150 - 46 - 150 - 50, 'link3');
     baseOfChampions = game.add.sprite(game.world.centerX - 108,game.world.height - 75, 'baseOfChampions');
     
     //setting reference anchor for all links in bottom center point
