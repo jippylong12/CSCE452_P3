@@ -13,3 +13,15 @@ can be further controlled by specifying the speed of rotation.
 
 To paint, simply press the PAINT button and continue to rotate the robot arm.
 The color options are shown to the left and can be selected by clicking on the color of choice.
+
+There are shortcuts to make the painting go by faster.
+1 - Set Slow Speed
+2 - Set Medium Speed
+3 - Set Fast Speed
+R - Pick Red
+O - Pick Orange
+Y - Pick Yellow
+G - Pick Green
+B - Pick Blue
+P - Pick Purple
+Space bar - Paint Toggle

@@ -291,6 +291,33 @@ function create() {
 
     //enable game input
     cursors = game.input.keyboard.createCursorKeys();
+
+    //keyboard shortcuts
+	key1 = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
+	key1.onDown.add(speedSlow,this);
+
+    key2 = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
+    key2.onDown.add(speedMedium,this);
+
+    key3 = game.input.keyboard.addKey(Phaser.Keyboard.THREE);
+    key3.onDown.add(speedFast,this);
+
+    keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    keySpace.onDown.add(actionPaint,this);
+
+    keyRed = game.input.keyboard.addKey(Phaser.Keyboard.R);
+    keyOrange = game.input.keyboard.addKey(Phaser.Keyboard.O);
+    keyYellow = game.input.keyboard.addKey(Phaser.Keyboard.Y);
+    keyGreen = game.input.keyboard.addKey(Phaser.Keyboard.G);
+    keyBlue = game.input.keyboard.addKey(Phaser.Keyboard.B);
+    keyPurple = game.input.keyboard.addKey(Phaser.Keyboard.P);
+
+    keyRed.onDown.add(selectRed,this);
+    keyOrange.onDown.add(selectOrange,this);
+    keyYellow.onDown.add(selectYellow,this);
+    keyGreen.onDown.add(selectGreen,this);
+    keyBlue.onDown.add(selectBlue,this);
+    keyPurple.onDown.add(selectPurple,this);
     
     updateSprites();
     
@@ -375,7 +402,6 @@ function speedMedium(){
 function speedFast(){
     rotationSpeed = 10;
 }
-
 </script>
 
 </body>
