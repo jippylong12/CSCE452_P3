@@ -3,10 +3,9 @@ For the 1st project of CSCE452
 
 TO RUN LOCALLY:
 -Download entire project as zip.
--Unzip to local directory.
--Double click "main.html"
--Make sure to enable pop-ups and browser addons
--Works in Chrome and Internet Explorer
+-Start up localserver suchas WAMP
+-Unzip to directory in WAMP.
+-Go to your browser and type in localserver/P1-master/main.html
 
 OPERATING THE ROBOTIC ARM
 The robot is controlled by rotating each link in the robotic arm either clockwise or counterclockwise and
