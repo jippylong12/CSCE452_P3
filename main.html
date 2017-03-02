@@ -66,6 +66,8 @@ var joint4 = math.matrix([0,0,0,1]);
 var paintToggle = false;
 var Paintcolor;
 
+var rotationSpeed;
+
 //-----------------------------------------------------------------------------
 //Kinematics Functions
 //----------------------------------------------------------------------------- 
@@ -77,13 +79,13 @@ function degToRad(degrees){
 
 // Calculate the transformation matrix for the link2 axis position (theta is in rads)
 function transAxis1(theta1, theta2){
-    theta1 = degToRad(theta1);
-    theta2 = degToRad(theta2);
+    var the1 = degToRad(theta1);
+    var the2 = degToRad(theta2);
     
     //has to be redone each time because theta is constantly changing
     var world_translation = math.matrix([[1,0,0,582],[0,1,0,654],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
-    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, -150], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix1 = math.matrix([[math.cos(the1), -math.sin(the1), 0, 0],   [math.sin(the1), math.cos(the1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(the2), -math.sin(the2), 0, 150], [math.sin(the2), math.cos(the2), 0, 0], [0,0,1,0], [0,0,0,1]]);
     
     var transform_matrix = math.multiply(world_translation,transform_matrix1);
     transform_matrix = math.multiply(transform_matrix,transform_matrix2);
@@ -93,19 +95,20 @@ function transAxis1(theta1, theta2){
 
 // Calculate the transformation matrix for the link3 axis position (theta is in rads)
 function transAxis2(theta1, theta2, theta3){
-    theta1 = degToRad(theta1);
-    theta2 = degToRad(theta2);
-    theta3 = degToRad(theta3);
+    var the1 = degToRad(theta1);
+    var the2 = degToRad(theta2);
+    var the3 = degToRad(theta3);
 
     var world_translation = math.matrix([[1,0,0,582],[0,1,0,654],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
-    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, -150], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 0], [math.sin(theta3), math.cos(theta3), 0, -100], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix1 = math.matrix([[math.cos(the1), -math.sin(the1), 0, 0],   [math.sin(the1), math.cos(the1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(the2), -math.sin(the2), 0, 150], [math.sin(the2), math.cos(the2), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix3 = math.matrix([[math.cos(the3), -math.sin(the3), 0, 100], [math.sin(the3), math.cos(the3), 0, 0], [0,0,1,0], [0,0,0,1]]);
     
     var temp_matrix  = math.multiply(world_translation, transform_matrix1);
     var temp_matrix2 = math.multiply(transform_matrix2, transform_matrix3);
 
     return math.multiply(temp_matrix, temp_matrix2);
+
 }
 
 // Calculate the transformation matrix for the end effector position (theta is in rads)
@@ -115,10 +118,10 @@ function transAxis3(theta1, theta2, theta3){
     theta3 = degToRad(theta3);
 
     var world_translation = math.matrix([[1,0,0,582],[0,1,0,654],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
-    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1), math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 0], [math.sin(theta2), math.cos(theta2), 0, -150], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 0], [math.sin(theta3), math.cos(theta3), 0, -100], [0,0,1,0], [0,0,0,1]]);
-    var transform_matrix4 = math.matrix([[1, 0, 0, 0], [0, 1, 0, -75], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix1 = math.matrix([[math.cos(theta1), -math.sin(theta1), 0, 0], [math.sin(theta1),   math.cos(theta1), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix2 = math.matrix([[math.cos(theta2), -math.sin(theta2), 0, 150], [math.sin(theta2), math.cos(theta2), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix3 = math.matrix([[math.cos(theta3), -math.sin(theta3), 0, 100], [math.sin(theta3), math.cos(theta3), 0, 0], [0,0,1,0], [0,0,0,1]]);
+    var transform_matrix4 = math.matrix([[1, 0, 0, 75], [0, 1, 0, 0], [0,0,1,0], [0,0,0,1]]);
     
     //unfortunately only supports multiplying two matricies at a time
     var temp_matrix  = math.multiply(world_translation, transform_matrix1);
@@ -131,6 +134,14 @@ function transAxis3(theta1, theta2, theta3){
 
 //wrapper function for axis calculations and rotations
 function updateSprites(){
+
+    var world_translation = math.matrix([[1,0,0,582],[0,1,0,654],[0,0,1,0],[0,0,0,1]]); //translation from world frame to base frame
+
+    var link1t = math.multiply(world_translation, joint1);
+
+    link1.x = link1t.get([0]);
+    link1.y = link1t.get([1]);
+
     //link2t(emp) describes transform operator to move the link2 axis to a new position
     var link2t = math.multiply(transAxis1(angle1, angle2), joint2); //angles are global and controlled by buttons
 
@@ -138,7 +149,7 @@ function updateSprites(){
     link2.x = link2t.get([0]);
     link2.y = link2t.get([1]);
 
-    //same transfrom for link3 axis
+    //same transform for link3 axis
     var link3t = math.multiply(transAxis2(angle1, angle2, angle3), joint3);
 
     link3.x = link3t.get([0]);
@@ -152,8 +163,8 @@ function updateSprites(){
 
     //adjusting angle to make sure orientation matches as expected
     link1.angle = angle1;
-    link2.angle = angle2;
-    link3.angle = angle3;
+    link2.angle = angle1 + angle2;
+    link3.angle = angle1 + angle2 + angle3;
     
     //if paint is on paint at end effector
     if(paintToggle == true){
@@ -198,11 +209,17 @@ function preload() {
     //background
     game.load.image('controlPanelBackground','assets/controlPanelBackground.png');
     game.load.image('easel','assets/easel.png');
+
     //base
     game.load.image('baseOfChampions','assets/baseOfChampions.png');
     game.load.image('link1','assets/link1.png');
     game.load.image('link2','assets/link2.png');
     game.load.image('link3','assets/link3.png');
+
+    //rotation speed
+    game.load.spritesheet( 'fast', 'assets/speed_fast.png', 100, 65, 2 );
+    game.load.spritesheet( 'medium', 'assets/speed_medium.png', 100, 65, 2);
+    game.load.spritesheet( 'slow', 'assets/speed_slow.png', 100, 65, 2);
 }
 
 //actually add assets in appropriate position, also set anchors for rotation axis references
@@ -214,13 +231,19 @@ function create() {
     easel.anchor.x = 0.5;
     easel.anchor.y = 0.5;
 
-    controlPanelBackground = game.add.sprite(game.world.centerX + 425,0,'controlPanelBackground');
+    controlPanelBackground = game.add.sprite(game.world.centerX + 250,0,'controlPanelBackground');
     controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
+    //Rotation speed
+    game.add.text(game.world.centerX + 275, 10, "Rotation Speed", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.button(game.world.centerX + 300, 250, 'fast', speedFast, this, 0, 0, 1, 0);
+    game.add.button(game.world.centerX + 300, 150, 'medium', speedMedium, this, 0, 0, 1, 0);
+    game.add.button(game.world.centerX + 300,  50, 'slow', speedSlow, this, 0, 0, 1, 0);
+
     //link text
-    var link1Text = game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
-    var link2Text = game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Arial", fill: "#7810B7", align: "center" });
-    var link3Text = game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
     //buttons
     joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
@@ -234,12 +257,12 @@ function create() {
 
     paintButton = game.add.button(game.world.centerX + 400, game.world.height - 250, 'paint', actionPaint, this, 0,0,1,0);
 
-    var button_red =    game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
-    var button_orange = game.add.button(130,130, 'color_orange', selectOrange, this, 0,0,1,0);
-    var button_yellow = game.add.button(30,230, 'color_yellow', selectYellow, this, 0,0,1,0);
-    var button_green =  game.add.button(130,330, 'color_green', selectGreen, this, 0,0,1,0);
-    var button_blue =   game.add.button(30,430, 'color_blue', selectBlue, this, 0,0,1,0);
-    var button_purple = game.add.button(130,530, 'color_purple', selectPurple, this, 0,0,1,0);
+    game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
+    game.add.button(130,130, 'color_orange', selectOrange, this, 0,0,1,0);
+    game.add.button(30,230, 'color_yellow', selectYellow, this, 0,0,1,0);
+    game.add.button(130,330, 'color_green', selectGreen, this, 0,0,1,0);
+    game.add.button(30,430, 'color_blue', selectBlue, this, 0,0,1,0);
+    game.add.button(130,530, 'color_purple', selectPurple, this, 0,0,1,0);
 
 
     //loading links
@@ -248,7 +271,7 @@ function create() {
     // to calculate the y difference, you start with the height, subtract the height of the sprite, then subtract the
     // height to the matching center you are trying to link
 
-    link1 = game.add.sprite(game.world.centerX - 108 + 50, game.world.height - 200 - 46 + 200, 'link1');
+    link1 = game.add.sprite(0, 0, 'link1');
     //link1 = game.add.sprite(0, 0, 'link1');
     link2 = game.add.sprite(0, 0, 'link2');
     link3 = game.add.sprite(0, 0, 'link3');
@@ -257,14 +280,14 @@ function create() {
     baseOfChampions = game.add.sprite(game.world.centerX - 108,game.world.height - 75, 'baseOfChampions');
     
     //setting reference anchor for all links in bottom center point
-    link1.anchor.x = 0.5;
-    link1.anchor.y = 180/200; //to adjust for where axis appears to be
+    link1.anchor.x = 0.2;
+    link1.anchor.y = 0.5; //to adjust for where axis appears to be
     
-    link2.anchor.x = 0.5;
-    link2.anchor.y = 125/150;
+    link2.anchor.x = 0.2;
+    link2.anchor.y = 0.5;
 
-    link3.anchor.x = 0.5;
-    link3.anchor.y = 0.8;
+    link3.anchor.x = 0.2;
+    link3.anchor.y = 0.5;
 
     //enable game input
     cursors = game.input.keyboard.createCursorKeys();
@@ -273,6 +296,8 @@ function create() {
     
     //enable graphics for paint brush
     graphics = game.add.graphics(0, 0);
+
+    rotationSpeed = 1;
 }
 
 //needed for compilation, functionality moved to button and updateSprites() function
@@ -286,32 +311,32 @@ function render() {}
 //-----------------------------------------------------------------------------
 
 function actionJoint1Clockwise () {
-    angle1 += 3;
+    angle1 += rotationSpeed;
     updateSprites();
 }
 
 function actionJoint1Ccw () {
-    angle1 -= 3;
+    angle1 -= rotationSpeed;
     updateSprites();
 }
 
 function actionJoint2Clockwise () {
-    angle2+= 3;
+    angle2+= rotationSpeed;
     updateSprites();
 }
 
 function actionJoint2Ccw () {
-    angle2-= 3;
+    angle2-= rotationSpeed;
     updateSprites();
 }
 
 function actionJoint3Clockwise () {
-    angle3+= 3;
+    angle3+= rotationSpeed;
     updateSprites();
 }
 
 function actionJoint3Ccw () {
-    angle3-= 3;
+    angle3-= rotationSpeed;
     updateSprites();
 }
 
@@ -337,6 +362,18 @@ function selectBlue(){
 }
 function selectPurple(){
     Paintcolor = 0x57007F;
+}
+
+function speedSlow(){
+    rotationSpeed = 1;
+}
+
+function speedMedium(){
+    rotationSpeed = 3;
+}
+
+function speedFast(){
+    rotationSpeed = 10;
 }
 
 </script>
