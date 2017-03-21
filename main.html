@@ -47,6 +47,16 @@ var joint2_ccw;
 var joint3_clockwise;
 var joint3_ccw;
 
+//World mode control
+var posX_WMC;
+var negX_WMC;
+
+var posY_WMC;
+var negY_WMC;
+
+var xPos;
+var yPos;
+
 //handles painting
 var paintButton;
 var graphics;
@@ -75,6 +85,10 @@ var rotationSpeed;
 //helper function to convert from degrees to radians
 function degToRad(degrees){
     return degrees*math.PI/180;
+}
+
+function radToDeg(radians){
+    return (radians*180)/math.PI
 }
 
 // Calculate the transformation matrix for the link2 axis position (theta is in rads)
@@ -130,6 +144,53 @@ function transAxis3(theta1, theta2, theta3){
     temp_matrix = math.multiply(temp_matrix, transform_matrix4);
 
     return temp_matrix;
+}
+
+//called everytime world control buttons are updated
+//NOTE:: may be negative signs flipped on y cause of coord system...
+function inverseKinSolver(x0, y0){ 
+    
+    //say if coordinate x0, y0 is out of radius range then throw out, otherwise update!
+    var baseX = 582;
+    var baseY = 654;
+    var r = 150+100+75;
+    var d = math.sqrt((x0-baseX)*(x0-baseX) + (y0-baseY)*(y0-baseY));
+    
+    if(/*d <= r*/true){//NOTE:: FIX!
+    
+        //NOTE:: cross Theta will probably be just a default value.... not sure yet
+        //var crossTheta = angle1 + angle2 + angle3;
+        var crossTheta = degToRad(angle1+angle2+angle3);
+        //perform inverse kinematics equations here
+        var lx = x0 - 75*math.cos(crossTheta);
+        var ly = y0 + 75*math.sin(crossTheta); // it is + because to go down we must add
+        var l = math.sqrt(lx*lx + ly*ly);
+        var q = (l*l - 150*150 -100*100)/(2*150*100);
+        console.log("HERE1: "+" y0, "+y0);  //second term imaginary?
+        console.log("HERE1: "+" x0, "+x0);  //second term imaginary?
+        console.log("HERE1: "+" big_theta, "+crossTheta);  //second term imaginary?
+        console.log("HERE1: "+" ly, "+ly);  //second term imaginary?
+        console.log("HERE1: "+" lx, "+lx);  //second term imaginary?
+        console.log("HERE1: "+" q, "+q);  //second term imaginary?
+        console.log("HERE1: "+" l, "+l+" , "+math.sqrt(1-q*q));  //second term imaginary?
+        var t2 = math.atan2(q, math.sqrt(1-q*q)); //NOTE:: choosing positive for sqrt now.... might be wrong, or maybe create an if case?
+        console.log("HERE2");
+        var t1 = math.atan2(150+100*math.cos(t2), 100*sin(t2)) + math.atan2(lx, ly);
+        console.log("HERE3");
+        var t3 = math.atan2(crossTheta - (t1 + t2));
+        
+        
+        //now update global angles and call updateSprites()
+        angle1 = radToDeg(t1);
+        angle2 = radToDeg(t2);
+        angle3 = radToDeg(t3);
+        updateSprites();
+    }
+    else
+    {
+        console.log("HERE1: "+" l, "+l+" , "+math.sqrt(1-q*q));  //second term imaginary?
+        console.log("Out of Range!");
+    }
 }
 
 //wrapper function for axis calculations and rotations
@@ -239,6 +300,25 @@ function create() {
     game.add.button(game.world.centerX + 300, 250, 'fast', speedFast, this, 0, 0, 1, 0);
     game.add.button(game.world.centerX + 300, 150, 'medium', speedMedium, this, 0, 0, 1, 0);
     game.add.button(game.world.centerX + 300,  50, 'slow', speedSlow, this, 0, 0, 1, 0);
+    
+    //world mode control
+    //text labels
+    game.add.text(game.world.centerX + 375, game.world.height - 350, "-X", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.text(game.world.centerX + 375, game.world.height - 250, "-Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.text(game.world.centerX + 520, game.world.height - 350, "+X", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    game.add.text(game.world.centerX + 520, game.world.height - 250, "+Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    
+    //buttons
+    game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', posX_WMCF, this, 0, 0, 1, 0);
+    game.add.button(game.world.centerX + 470,  game.world.height - 220, 'slow', posY_WMCF, this, 0, 0, 1, 0);
+    negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
+    negY_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 190, 'slow', negY_WMCF, this, 0, 0, 1, 0);
+    //flip these buttons
+    negX_WMC.anchor.setTo(0.5, 0.5);
+    negY_WMC.anchor.setTo(0.5, 0.5);
+    negX_WMC.angle = 180;
+    negY_WMC.angle = 180;
+    
 
     //link text
     game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
@@ -255,7 +335,7 @@ function create() {
     joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
     joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
 
-    paintButton = game.add.button(game.world.centerX + 400, game.world.height - 250, 'paint', actionPaint, this, 0,0,1,0);
+    paintButton = game.add.button(game.world.centerX + 400, game.world.height - 175, 'paint', actionPaint, this, 0,0,1,0);
 
     game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
     game.add.button(130,130, 'color_orange', selectOrange, this, 0,0,1,0);
@@ -325,6 +405,10 @@ function create() {
     graphics = game.add.graphics(0, 0);
 
     rotationSpeed = 1;
+    
+    //set initial x & y for world mode ctrl
+    xPos = 582;
+    yPos = 654-(150+100+75);
 }
 
 //needed for compilation, functionality moved to button and updateSprites() function
@@ -401,6 +485,33 @@ function speedMedium(){
 
 function speedFast(){
     rotationSpeed = 10;
+}
+
+var incAmt = 10; //NOTE:: amt probably should be adjustable by speed buttons!
+function posX_WMCF(){
+    xPos += incAmt;
+    inverseKinSolver(xPos, yPos);
+    console.log("posX: " + xPos + ","+yPos);
+}
+
+function posY_WMCF(){
+    //negative because 0,0 is top left corner and if we want to move upward we have to subtract y
+    yPos -= incAmt;
+    inverseKinSolver(xPos, yPos);
+    console.log("posY!: " + xPos + ","+yPos);
+}
+
+function negX_WMCF(){
+    xPos -= incAmt;
+    inverseKinSolver(xPos, yPos);
+    console.log("negX!: " + xPos + ","+yPos);
+}
+
+function negY_WMCF(){
+    //positive 0,0 is top left corner and if we want to move upward we have to add y
+    yPos += incAmt;
+    inverseKinSolver(xPos, yPos);
+    console.log("negY!: " + xPos + ","+yPos);
 }
 </script>
 
