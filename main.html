@@ -153,43 +153,43 @@ function inverseKinSolver(x0, y0){
     //say if coordinate x0, y0 is out of radius range then throw out, otherwise update!
     var baseX = 582;
     var baseY = 654;
+    var Xp = x0 -582;
+    var Yp = baseY-y0;
     var r = 150+100+75;
-    var d = math.sqrt((x0-baseX)*(x0-baseX) + (y0-baseY)*(y0-baseY));
+    var d = math.sqrt((x0-baseX)*(x0-baseX) + (y0-baseY)*(y0-baseY));//there is an extra 10 pixels from something
     
-    if(/*d <= r*/true){//NOTE:: FIX!
+    if(d <= r){
     
         //NOTE:: cross Theta will probably be just a default value.... not sure yet
         //var crossTheta = angle1 + angle2 + angle3;
         var crossTheta = degToRad(angle1+angle2+angle3);
         //perform inverse kinematics equations here
-        var lx = x0 - 75*math.cos(crossTheta);
-        var ly = y0 + 75*math.sin(crossTheta); // it is + because to go down we must add
+        var lx = Xp - 75*math.cos(crossTheta);
+        var ly = Yp + 75*math.sin(crossTheta) -4 ; // it is + because to go down we must add, -4 for some error correction
         var l = math.sqrt(lx*lx + ly*ly);
         var q = (l*l - 150*150 -100*100)/(2*150*100);
-        console.log("HERE1: "+" y0, "+y0);  //second term imaginary?
-        console.log("HERE1: "+" x0, "+x0);  //second term imaginary?
-        console.log("HERE1: "+" big_theta, "+crossTheta);  //second term imaginary?
-        console.log("HERE1: "+" ly, "+ly);  //second term imaginary?
-        console.log("HERE1: "+" lx, "+lx);  //second term imaginary?
-        console.log("HERE1: "+" q, "+q);  //second term imaginary?
-        console.log("HERE1: "+" l, "+l+" , "+math.sqrt(1-q*q));  //second term imaginary?
-        var t2 = math.atan2(q, math.sqrt(1-q*q)); //NOTE:: choosing positive for sqrt now.... might be wrong, or maybe create an if case?
+        var theta2 = math.atan2(q, math.sqrt(1-q*q)); //NOTE:: choosing positive for sqrt now.... might be wrong, or maybe create an if case?
         console.log("HERE2");
-        var t1 = math.atan2(150+100*math.cos(t2), 100*sin(t2)) + math.atan2(lx, ly);
-        console.log("HERE3");
-        var t3 = math.atan2(crossTheta - (t1 + t2));
+
+        var lambda1 = math.atan2(150+100*math.cos(theta2),100*math.sin(theta2));
+        var lambda2 = math.atan2(lx,ly);
+
+        var theta1 = lambda1 + lambda2;
+        var theta3 = crossTheta - (theta1+theta2);
         
         
         //now update global angles and call updateSprites()
-        angle1 = radToDeg(t1);
-        angle2 = radToDeg(t2);
-        angle3 = radToDeg(t3);
+        angle1 = radToDeg(theta1);
+        angle2 = radToDeg(theta2);
+        angle3 = radToDeg(theta3);
         updateSprites();
+        return 1;
     }
     else
     {
         console.log("HERE1: "+" l, "+l+" , "+math.sqrt(1-q*q));  //second term imaginary?
         console.log("Out of Range!");
+        return 0;
     }
 }
 
@@ -489,28 +489,38 @@ function speedFast(){
 
 var incAmt = 10; //NOTE:: amt probably should be adjustable by speed buttons!
 function posX_WMCF(){
+    var tempX = xPos;
     xPos += incAmt;
-    inverseKinSolver(xPos, yPos);
+    var success = inverseKinSolver(xPos, yPos);
+    if(!success)
+        xPos = tempX;
     console.log("posX: " + xPos + ","+yPos);
 }
 
 function posY_WMCF(){
-    //negative because 0,0 is top left corner and if we want to move upward we have to subtract y
+    var tempY = yPos;
     yPos -= incAmt;
-    inverseKinSolver(xPos, yPos);
+    var success = inverseKinSolver(xPos, yPos);
+    if(!success)
+        yPos = tempY;
     console.log("posY!: " + xPos + ","+yPos);
 }
 
 function negX_WMCF(){
+    var tempX = xPos;
     xPos -= incAmt;
-    inverseKinSolver(xPos, yPos);
+    var success = inverseKinSolver(xPos, yPos);
+    if(!success)
+        xPos = tempX;
     console.log("negX!: " + xPos + ","+yPos);
 }
 
 function negY_WMCF(){
-    //positive 0,0 is top left corner and if we want to move upward we have to add y
+    var tempY = yPos;
     yPos += incAmt;
-    inverseKinSolver(xPos, yPos);
+    var success = inverseKinSolver(xPos, yPos);
+    if(!success)
+        yPos = tempY;
     console.log("negY!: " + xPos + ","+yPos);
 }
 </script>
