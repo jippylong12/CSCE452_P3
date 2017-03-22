@@ -1,5 +1,5 @@
-# P1
-For the 1st project of CSCE452
+# P2
+For the 2nd project of CSCE452
 
 TO RUN LOCALLY:
 -Download entire project as zip.
@@ -25,3 +25,7 @@ G - Pick Green
 B - Pick Blue
 P - Pick Purple
 Space bar - Paint Toggle
+
+Now you can control the robot by making it go left or right using the X and Y controls. 
+
+There is also an eraser and you can change the size of the paint brush using the buttons. 
