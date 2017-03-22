@@ -168,12 +168,10 @@
             var crossTheta = degToRad(angle1+angle2+angle3);
             //perform inverse kinematics equations here
             var lx = Xp - 75*math.cos(crossTheta);
-            var ly = Yp + 75*math.sin(crossTheta) -4 ; // it is + because to go down we must add, -4 for some error correction
+            var ly = Yp + 75*math.sin(crossTheta); // it is + because to go down we must add, -4 for some error correction
             var l = math.sqrt(lx*lx + ly*ly);
             var q = (l*l - 150*150 -100*100)/(2*150*100);
             var theta2 = math.acos(q);
-            //var theta2 = math.atan2(q, math.sqrt(1-q*q)); //NOTE:: choosing positive for sqrt now.... might be wrong, or maybe create an if case?
-            console.log("HERE2");
 
             var lambda1 = math.atan2(150+100*math.cos(theta2),100*math.sin(theta2));
             var lambda2 = math.atan2(lx,ly);
@@ -223,8 +221,8 @@
         //same transform for endEffector
         var EEt = math.multiply(transAxis3(angle1, angle2, angle3), joint4);
 
-        endEffectorX = EEt.get([0]);
-        endEffectorY = EEt.get([1]);
+        endEffectorX = math.round(EEt.get([0]),0);
+        endEffectorY = math.round(EEt.get([1]),0);
 
         //adjusting angle to make sure orientation matches as expected
         link1.angle = angle1;
