@@ -160,7 +160,7 @@
         var Yp = baseY-yp;
         var r = 150+100+75;
         var d = math.sqrt((xp-baseX)*(xp-baseX) + (yp-baseY)*(yp-baseY));
-
+        console.log("d: "+d);
         if(d <= r){
 
             //NOTE:: cross Theta will probably be just a default value.... not sure yet
@@ -169,7 +169,13 @@
             //perform inverse kinematics equations here
             var lx = Xp - 75*math.cos(crossTheta);
             var ly = Yp + 75*math.sin(crossTheta); // it is + because to go down we must add, -4 for some error correction
-            var l = math.sqrt(lx*lx + ly*ly);
+            var l = math.round(math.sqrt(lx*lx + ly*ly),0);
+            if(l > 250)
+            {
+                console.log("Out of Range!");
+                return 0;
+            }
+
             var q = (l*l - 150*150 -100*100)/(2*150*100);
             var theta2 = math.acos(q);
 
@@ -560,7 +566,6 @@
         var success = inverseKinSolver(xPos, yPos);
         if(!success)
             xPos = tempX;
-        console.log("posX: " + xPos + ","+yPos);
     }
 
     function posY_WMCF(){
@@ -569,7 +574,6 @@
         var success = inverseKinSolver(xPos, yPos);
         if(!success)
             yPos = tempY;
-        console.log("posY!: " + xPos + ","+yPos);
     }
 
     function negX_WMCF(){
@@ -578,7 +582,6 @@
         var success = inverseKinSolver(xPos, yPos);
         if(!success)
             xPos = tempX;
-        console.log("negX!: " + xPos + ","+yPos);
     }
 
     function negY_WMCF(){
@@ -587,7 +590,6 @@
         var success = inverseKinSolver(xPos, yPos);
         if(!success)
             yPos = tempY;
-        console.log("negY!: " + xPos + " , "+yPos);
     }
 </script>
 
