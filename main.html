@@ -75,6 +75,8 @@ var joint4 = math.matrix([0,0,0,1]);
 //detertimines whether to paint or not
 var paintToggle = false;
 var Paintcolor;
+var PaintSize = 10;
+var eraseToggle = false;
 
 var rotationSpeed;
 
@@ -231,7 +233,12 @@ function updateSprites(){
     if(paintToggle == true){
         //if paint button is pressed:
         graphics.beginFill(Paintcolor, 1); //red circle
-        graphics.drawCircle(endEffectorX, endEffectorY, 10); //x, y, diam
+        graphics.drawCircle(endEffectorX, endEffectorY, PaintSize); //x, y, diam
+    }
+    else if(eraseToggle == true){
+        //if erase button is pressed:
+        graphics.beginFill(0xEFEFEF, 1); //red circle
+        graphics.drawCircle(endEffectorX, endEffectorY, PaintSize+1); //x, y, diam
     }
 }
 
@@ -258,6 +265,7 @@ function preload() {
     game.load.spritesheet('joint3_ccw','assets/arrow_rotate_counterclockwise_spritesheet.png',75,75,2);
 
     game.load.spritesheet('paint', 'assets/Paint.png',250,250,2);
+    game.load.spritesheet('eraser', 'assets/eraser.png',234,80,1);
 
     //colors
     game.load.spritesheet('color_red','assets/colors/red.png',100,100,2);
@@ -266,9 +274,15 @@ function preload() {
     game.load.spritesheet('color_green','assets/colors/green.png',100,100,2);
     game.load.spritesheet('color_blue','assets/colors/blue.png',100,100,2);
     game.load.spritesheet('color_purple','assets/colors/purple.png',100,100,2);
+    
+    //sizes
+    game.load.spritesheet('size_small', 'assets/small_button.png',100,40,2);
+    game.load.spritesheet('size_medium', 'assets/medium_button.png',100,40,2);
+    game.load.spritesheet('size_large', 'assets/large_button.png',100,40,2);
 
     //background
     game.load.image('controlPanelBackground','assets/controlPanelBackground.png');
+    game.load.image('brushSizeBackground','assets/brush_size_bg.png');
     game.load.image('easel','assets/easel.png');
 
     //base
@@ -294,6 +308,8 @@ function create() {
 
     controlPanelBackground = game.add.sprite(game.world.centerX + 250,0,'controlPanelBackground');
     controlPanelText = game.add.text(game.world.centerX + 470, 10, "Control Panel", { font: "24px Arial", fill: "#7810B7", align: "center" });
+    
+    brushSizeBackground = game.add.sprite(18, 450, 'brushSizeBackground');
 
     //Rotation speed
     game.add.text(game.world.centerX + 275, 10, "Rotation Speed", { font: "24px Arial", fill: "#7810B7", align: "center" });
@@ -313,6 +329,7 @@ function create() {
     game.add.button(game.world.centerX + 470,  game.world.height - 220, 'slow', posY_WMCF, this, 0, 0, 1, 0);
     negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
     negY_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 190, 'slow', negY_WMCF, this, 0, 0, 1, 0);
+    
     //flip these buttons
     negX_WMC.anchor.setTo(0.5, 0.5);
     negY_WMC.anchor.setTo(0.5, 0.5);
@@ -336,13 +353,18 @@ function create() {
     joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
 
     paintButton = game.add.button(game.world.centerX + 400, game.world.height - 175, 'paint', actionPaint, this, 0,0,1,0);
+    eraseButton = game.add.button(18, 360, 'eraser', actionErase, this, 0,0,1,0);
 
     game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
-    game.add.button(130,130, 'color_orange', selectOrange, this, 0,0,1,0);
-    game.add.button(30,230, 'color_yellow', selectYellow, this, 0,0,1,0);
-    game.add.button(130,330, 'color_green', selectGreen, this, 0,0,1,0);
-    game.add.button(30,430, 'color_blue', selectBlue, this, 0,0,1,0);
-    game.add.button(130,530, 'color_purple', selectPurple, this, 0,0,1,0);
+    game.add.button(140,30, 'color_orange', selectOrange, this, 0,0,1,0);
+    game.add.button(30,140, 'color_yellow', selectYellow, this, 0,0,1,0);
+    game.add.button(140,140, 'color_green', selectGreen, this, 0,0,1,0);
+    game.add.button(30,250, 'color_blue', selectBlue, this, 0,0,1,0);
+    game.add.button(140,250, 'color_purple', selectPurple, this, 0,0,1,0);
+    
+    game.add.button(35, 520, 'size_small', selectSmall, this, 0, 0, 1, 0);
+    game.add.button(105, 560, 'size_medium', selectMedium, this, 0, 0, 1, 0);
+    game.add.button(35, 600, 'size_large', selectLarge, this, 0, 0, 1, 0);
 
 
     //loading links
@@ -384,13 +406,20 @@ function create() {
 
     keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     keySpace.onDown.add(actionPaint,this);
-
+    
+    keyErase = game.input.keyboard.addKey(Phaser.Keyboard.D);
+    keyErase.onDown.add(actionErase,this);
+    
     keyRed = game.input.keyboard.addKey(Phaser.Keyboard.R);
     keyOrange = game.input.keyboard.addKey(Phaser.Keyboard.O);
     keyYellow = game.input.keyboard.addKey(Phaser.Keyboard.Y);
     keyGreen = game.input.keyboard.addKey(Phaser.Keyboard.G);
     keyBlue = game.input.keyboard.addKey(Phaser.Keyboard.B);
     keyPurple = game.input.keyboard.addKey(Phaser.Keyboard.P);
+    
+    keySmall =  game.input.keyboard.addKey(Phaser.Keyboard.S);
+    keyMedium =  game.input.keyboard.addKey(Phaser.Keyboard.M);
+    keyLarge =  game.input.keyboard.addKey(Phaser.Keyboard.L);
 
     keyRed.onDown.add(selectRed,this);
     keyOrange.onDown.add(selectOrange,this);
@@ -398,6 +427,10 @@ function create() {
     keyGreen.onDown.add(selectGreen,this);
     keyBlue.onDown.add(selectBlue,this);
     keyPurple.onDown.add(selectPurple,this);
+    
+    keySmall.onDown.add(selectSmall, this);
+    keyMedium.onDown.add(selectMedium, this);
+    keyLarge.onDown.add(selectLarge, this);
     
     updateSprites();
     
@@ -454,7 +487,17 @@ function actionJoint3Ccw () {
 function actionPaint(){
     // toggle paint functionality
     paintToggle = !paintToggle;
+    // ensure erase function is off
+    eraseToggle = false;
 }
+
+function actionErase(){
+    // toggle erase functionality
+    eraseToggle = !eraseToggle;
+    // ensure paint function is off
+    paintToggle = false;
+}
+
 
 function selectRed(){
     Paintcolor = 0xFF0000;
@@ -475,6 +518,20 @@ function selectPurple(){
     Paintcolor = 0x57007F;
 }
 
+
+
+function selectSmall(){
+    PaintSize = 5;
+}
+function selectMedium(){
+    PaintSize = 10;
+}
+function selectLarge(){
+    PaintSize = 20;
+}
+
+
+
 function speedSlow(){
     rotationSpeed = 1;
 }
@@ -486,6 +543,7 @@ function speedMedium(){
 function speedFast(){
     rotationSpeed = 10;
 }
+
 
 var incAmt = 10; //NOTE:: amt probably should be adjustable by speed buttons!
 function posX_WMCF(){
