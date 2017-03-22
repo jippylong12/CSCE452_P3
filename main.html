@@ -156,7 +156,7 @@ function inverseKinSolver(x0, y0){
     var Xp = x0 -582;
     var Yp = baseY-y0;
     var r = 150+100+75;
-    var d = math.sqrt((x0-baseX)*(x0-baseX) + (y0-baseY)*(y0-baseY));//there is an extra 10 pixels from something
+    var d = math.sqrt((x0-baseX)*(x0-baseX) + (y0-baseY)*(y0-baseY));
     
     if(d <= r){
     
@@ -179,9 +179,9 @@ function inverseKinSolver(x0, y0){
         
         
         //now update global angles and call updateSprites()
-        angle1 = radToDeg(theta1);
+        angle1 = radToDeg(theta1) + 180;
         angle2 = radToDeg(theta2);
-        angle3 = radToDeg(theta3);
+        angle3 = radToDeg(theta3)+180;
         updateSprites();
         return 1;
     }
@@ -271,7 +271,7 @@ function preload() {
     game.load.image('controlPanelBackground','assets/controlPanelBackground.png');
     game.load.image('easel','assets/easel.png');
 
-    //base
+    //base and links
     game.load.image('baseOfChampions','assets/baseOfChampions.png');
     game.load.image('link1','assets/link1.png');
     game.load.image('link2','assets/link2.png');
@@ -407,12 +407,16 @@ function create() {
     rotationSpeed = 1;
     
     //set initial x & y for world mode ctrl
-    xPos = 582;
-    yPos = 654-(150+100+75);
+    xPos = endEffectorX
+    yPos = endEffectorY
 }
 
 //needed for compilation, functionality moved to button and updateSprites() function
-function update() {}
+function update() {
+    //NEED TO BE UPDATED SO WE DON'T LOSE TRACK
+    xPos = endEffectorX
+    yPos = endEffectorY
+}
 
 //needed for debugging info
 function render() {}
@@ -488,6 +492,7 @@ function speedFast(){
 }
 
 var incAmt = 10; //NOTE:: amt probably should be adjustable by speed buttons!
+
 function posX_WMCF(){
     var tempX = xPos;
     xPos += incAmt;
