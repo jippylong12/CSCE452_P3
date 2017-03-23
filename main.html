@@ -79,6 +79,7 @@
     var eraseToggle = false;
 
     var rotationSpeed;
+    var incAmt = 3;
 
     //-----------------------------------------------------------------------------
     //Kinematics Functions
@@ -149,7 +150,6 @@
     }
 
     //called everytime world control buttons are updated
-    //NOTE:: may be negative signs flipped on y cause of coord system...
     function inverseKinSolver(xp, yp){
         console.log("xp: "+xp);
         console.log("yp: "+yp);
@@ -163,8 +163,6 @@
         console.log("d: "+d);
         if(d <= r){
 
-            //NOTE:: cross Theta will probably be just a default value.... not sure yet
-            //var crossTheta = angle1 + angle2 + angle3;
             var crossTheta = degToRad(angle1+angle2+angle3);
             //perform inverse kinematics equations here
             var lx = Xp - 75*math.cos(crossTheta);
@@ -248,6 +246,11 @@
             graphics.drawCircle(endEffectorX, endEffectorY, 10); //x, y, diam
 
         }
+        
+        game.world.bringToTop(link1);
+        game.world.bringToTop(baseOfChampions);
+        game.world.bringToTop(link2);
+        game.world.bringToTop(link3);
     }
 
 
@@ -334,15 +337,17 @@
 
         //buttons
         game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', posX_WMCF, this, 0, 0, 1, 0);
-        game.add.button(game.world.centerX + 470,  game.world.height - 220, 'slow', posY_WMCF, this, 0, 0, 1, 0);
+        posY_WMC = game.add.button(game.world.centerX + 540,  game.world.height - 170, 'slow', posY_WMCF, this, 0, 0, 1, 0);
         negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
-        negY_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 190, 'slow', negY_WMCF, this, 0, 0, 1, 0);
+        negY_WMC = game.add.button(game.world.centerX + 390,  game.world.height - 215, 'slow', negY_WMCF, this, 0, 0, 1, 0);
 
         //flip these buttons
         negX_WMC.anchor.setTo(0.5, 0.5);
         negY_WMC.anchor.setTo(0.5, 0.5);
+        posY_WMC.anchor.setTo(0.5, 0.5);
         negX_WMC.angle = 180;
-        negY_WMC.angle = 180;
+        negY_WMC.angle = 90;
+        posY_WMC.angle = 270;
 
 
         //link text
@@ -547,18 +552,19 @@
 
     function speedSlow(){
         rotationSpeed = 1;
+        incAmt = 3;
     }
 
     function speedMedium(){
         rotationSpeed = 3;
+        incAmt = 8;
     }
 
     function speedFast(){
         rotationSpeed = 10;
+        incAmt = 12;
     }
 
-
-    var incAmt = 10; //NOTE:: amt probably should be adjustable by speed buttons!
 
     function posX_WMCF(){
         var tempX = xPos;
