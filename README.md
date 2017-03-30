@@ -1,4 +1,4 @@
-# P2
+# P3
 For the 2nd project of CSCE452
 
 TO RUN LOCALLY:
