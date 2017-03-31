@@ -236,13 +236,19 @@
         game.world.bringToTop(link3);
     }
 
-
+    function intitialize_socket(){
+        var socket = io.connect();
+        window.socket = socket;
+    }
     //-----------------------------------------------------------------------------
     //Phaser Game Functionality
     //-----------------------------------------------------------------------------
 
     //mapping phaser game to var
     var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
+    window.socket = null;
+    
+    intitialize_socket();
 
     //preload assets needed for game
     function preload() {
