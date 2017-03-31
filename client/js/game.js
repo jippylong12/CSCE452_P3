@@ -1,7 +1,10 @@
    //-----------------------------------------------------------------------------
     //Global Variables
     //-----------------------------------------------------------------------------
+
+   //TDP STUFF
     var socket = io();
+    var masterBool = false;
     //controls
     var cursors;
 
@@ -171,6 +174,9 @@
             angle1 = radToDeg(theta1) + 180;
             angle2 = radToDeg(theta2);
             angle3 = radToDeg(theta3) + 180;
+
+            var angles = [angle1,angle2,angle3];
+            socket.emit('angles', angles);
             updateSprites();
             return 1;
         }

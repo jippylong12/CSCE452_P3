@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 
 var clients = {};
 var clientCount = 0;
-
+var masterBool = false;
 app.use(express.static(path.join(__dirname, '/client')));
 
 // viewed at http://localhost:8080
@@ -22,10 +22,16 @@ io.on('connection', function(socket){
         clientCount-=1;
         delete clients[socket.id];
     });
-
+    socket.on('angles', function(msg){
+        console.log('message: ' + msg);
+    });
     console.log('a user connected');
     clientCount+=1;
-    clients[socket.id] = clientCount;
+    //IF THIS IS THE FIRST IT NOW BECOMES THE MASTER
+    masterBool = clientCount == 1;
+
+    clients[socket.id] = masterBool;
+
 
 });
 
