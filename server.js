@@ -1,13 +1,14 @@
 var express = require('express');
 var app = express();
+var http = require('http').Server(app);
 var path = require('path');
 var server = require("http").createServer(app);
-var io = require("socket.io").listen(server);
 var serverPacket = require("./serverPacket");
+var io = require('socket.io')(http);
 
+var clients = {};
+var clientCount = 0;
 
-
-// Serve static files from client directory to html
 app.use(express.static(path.join(__dirname, '/client')));
 
 // viewed at http://localhost:8080
@@ -34,6 +35,7 @@ function setEventHandlers() {
 		client.on("disconnect", onClientDisconnect);
 		client.on("move", onMove);
 		client.on("paint", onPaint);
+		client.on("paint", onPaint);
 		client.on("setup", onSetup);
 	});
 };
@@ -42,12 +44,11 @@ function onConnect(){
     this.emit("connect"); //NOTE:: ping client that we are connected?
 }
 
-
-
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/client/main.html'));
 });
 
+//for c9 hosting
 io.on('connection', function(client) {
     console.log('Client connected...');
     
@@ -57,3 +58,23 @@ io.on('connection', function(client) {
 })
 
 app.listen(8080);
+
+//for external hosting
+/*
+io.on('connection', function(socket){
+    socket.on('disconnect', function(){
+        console.log('user disconnected');
+        clientCount-=1;
+        delete clients[socket.id];
+    });
+
+    console.log('a user connected');
+    clientCount+=1;
+    clients[socket.id] = clientCount;
+
+});
+
+http.listen(3000, function(){
+    console.log('listening on *:3000');
+});
+*/
