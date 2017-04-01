@@ -3,7 +3,7 @@
     //-----------------------------------------------------------------------------
 
    //TDP STUFF
-    var socket = io();
+    var socket;
     var masterBool = false;
     //controls
     var cursors;
@@ -66,6 +66,8 @@
 
     var rotationSpeed;
     var incAmt = 3;
+
+    var isMaster = false;
 
     //-----------------------------------------------------------------------------
     //Kinematics Functions
@@ -176,7 +178,9 @@
             angle3 = radToDeg(theta3) + 180;
 
             var angles = [angle1,angle2,angle3];
-            socket.emit('angles', angles);
+
+            //socket.emit('angles', angles);
+
             updateSprites();
             return 1;
         }
@@ -240,11 +244,29 @@
         game.world.bringToTop(baseOfChampions);
         game.world.bringToTop(link2);
         game.world.bringToTop(link3);
+
+        var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
+
+        if(isMaster) {
+            console.log("emitting data to slave");
+            socket.emit('world data', data);
+        }
+
     }
 
     function intitialize_socket(){
-        var socket = io.connect();
-        window.socket = socket;
+        socket = io.connect();
+
+        socket.emit('join', function(msg){
+           isMaster = msg;
+
+           console.log('master boolean: ' + isMaster);
+        });
+
+        socket.on('master', function(master){
+            console.log("received master is: " + master);
+            isMaster = master;
+        })
     }
     //-----------------------------------------------------------------------------
     //Phaser Game Functionality
@@ -252,9 +274,12 @@
 
     //mapping phaser game to var
     var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
+
     window.socket = null;
     
     intitialize_socket();
+
+    console.log("Is Master is " + isMaster);
 
     //preload assets needed for game
     function preload() {
@@ -317,63 +342,124 @@
 
         brushSizeBackground = game.add.sprite(18, 450, 'brushSizeBackground');
 
-        //Rotation speed
-        game.add.text(game.world.centerX + 275, 10, "Rotation Speed", { font: "24px Arial", fill: "#7810B7", align: "center" });
-        game.add.button(game.world.centerX + 300, 250, 'fast', speedFast, this, 0, 0, 1, 0);
-        game.add.button(game.world.centerX + 300, 150, 'medium', speedMedium, this, 0, 0, 1, 0);
-        game.add.button(game.world.centerX + 300,  50, 'slow', speedSlow, this, 0, 0, 1, 0);
+        if(isMaster){
+            //Rotation speed
+            game.add.text(game.world.centerX + 275, 10, "Rotation Speed", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.button(game.world.centerX + 300, 250, 'fast', speedFast, this, 0, 0, 1, 0);
+            game.add.button(game.world.centerX + 300, 150, 'medium', speedMedium, this, 0, 0, 1, 0);
+            game.add.button(game.world.centerX + 300,  50, 'slow', speedSlow, this, 0, 0, 1, 0);
 
-        //world mode control
-        //text labels
-        game.add.text(game.world.centerX + 375, game.world.height - 350, "-X", { font: "24px Arial", fill: "#7810B7", align: "center" });
-        game.add.text(game.world.centerX + 375, game.world.height - 250, "-Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
-        game.add.text(game.world.centerX + 520, game.world.height - 350, "+X", { font: "24px Arial", fill: "#7810B7", align: "center" });
-        game.add.text(game.world.centerX + 520, game.world.height - 250, "+Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            //world mode control
+            //text labels
+            game.add.text(game.world.centerX + 375, game.world.height - 350, "-X", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 375, game.world.height - 250, "-Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 520, game.world.height - 350, "+X", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 520, game.world.height - 250, "+Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
-        //buttons
-        game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', posX_WMCF, this, 0, 0, 1, 0);
-        posY_WMC = game.add.button(game.world.centerX + 540,  game.world.height - 170, 'slow', posY_WMCF, this, 0, 0, 1, 0);
-        negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
-        negY_WMC = game.add.button(game.world.centerX + 390,  game.world.height - 215, 'slow', negY_WMCF, this, 0, 0, 1, 0);
+            //buttons
+            game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', posX_WMCF, this, 0, 0, 1, 0);
+            posY_WMC = game.add.button(game.world.centerX + 540,  game.world.height - 170, 'slow', posY_WMCF, this, 0, 0, 1, 0);
+            negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
+            negY_WMC = game.add.button(game.world.centerX + 390,  game.world.height - 215, 'slow', negY_WMCF, this, 0, 0, 1, 0);
 
-        //flip these buttons
-        negX_WMC.anchor.setTo(0.5, 0.5);
-        negY_WMC.anchor.setTo(0.5, 0.5);
-        posY_WMC.anchor.setTo(0.5, 0.5);
-        negX_WMC.angle = 180;
-        negY_WMC.angle = 90;
-        posY_WMC.angle = 270;
+            //flip these buttons
+            negX_WMC.anchor.setTo(0.5, 0.5);
+            negY_WMC.anchor.setTo(0.5, 0.5);
+            posY_WMC.anchor.setTo(0.5, 0.5);
+            negX_WMC.angle = 180;
+            negY_WMC.angle = 90;
+            posY_WMC.angle = 270;
+
+            //link text
+            game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+
+            //buttons
+            joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
+            joint1_ccw = game.add.button(game.world.centerX + 475, 50, 'joint1_ccw', actionJoint1Ccw, this, 0,0,1,0);
+
+            joint2_clockwise = game.add.button(game.world.centerX + 565, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 0,0,1,0);
+            joint2_ccw = game.add.button(game.world.centerX + 475, 150, 'joint2_ccw', actionJoint2Ccw, this, 0,0,1,0);
+
+            joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
+            joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
+
+            paintButton = game.add.button(game.world.centerX + 400, game.world.height - 175, 'paint', actionPaint, this, 0,0,1,0);
+
+            game.add.button(18, 360, 'eraser', actionErase, this, 0,0,1,0);
+
+            game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
+            game.add.button(140,30, 'color_orange', selectOrange, this, 0,0,1,0);
+            game.add.button(30,140, 'color_yellow', selectYellow, this, 0,0,1,0);
+            game.add.button(140,140, 'color_green', selectGreen, this, 0,0,1,0);
+            game.add.button(30,250, 'color_blue', selectBlue, this, 0,0,1,0);
+            game.add.button(140,250, 'color_purple', selectPurple, this, 0,0,1,0);
+
+            game.add.button(35, 520, 'size_small', selectSmall, this, 0, 0, 1, 0);
+            game.add.button(105, 560, 'size_medium', selectMedium, this, 0, 0, 1, 0);
+            game.add.button(35, 600, 'size_large', selectLarge, this, 0, 0, 1, 0);
+        }
+        else {
+            //Rotation speed
+            game.add.text(game.world.centerX + 275, 10, "Rotation Speed", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.button(game.world.centerX + 300, 250, 'fast', noAction, this, 0, 0, 1, 0);
+            game.add.button(game.world.centerX + 300, 150, 'medium', noAction, this, 0, 0, 1, 0);
+            game.add.button(game.world.centerX + 300,  50, 'slow', noAction, this, 0, 0, 1, 0);
+
+            //world mode control
+            //text labels
+            game.add.text(game.world.centerX + 375, game.world.height - 350, "-X", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 375, game.world.height - 250, "-Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 520, game.world.height - 350, "+X", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 520, game.world.height - 250, "+Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
+
+            //buttons
+            game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', posX_WMCF, this, 0, 0, 1, 0);
+            posY_WMC = game.add.button(game.world.centerX + 540,  game.world.height - 170, 'slow', posY_WMCF, this, 0, 0, 1, 0);
+            negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
+            negY_WMC = game.add.button(game.world.centerX + 390,  game.world.height - 215, 'slow', negY_WMCF, this, 0, 0, 1, 0);
+
+            //flip these buttons
+            negX_WMC.anchor.setTo(0.5, 0.5);
+            negY_WMC.anchor.setTo(0.5, 0.5);
+            posY_WMC.anchor.setTo(0.5, 0.5);
+            negX_WMC.angle = 180;
+            negY_WMC.angle = 90;
+            posY_WMC.angle = 270;
 
 
-        //link text
-        game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
-        game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Arial", fill: "#7810B7", align: "center" });
-        game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            //link text
+            game.add.text(game.world.centerX + 440, 75, "L1:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 440, 175, "L2:", { font: "24px Arial", fill: "#7810B7", align: "center" });
+            game.add.text(game.world.centerX + 440, 275, "L3:", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
-        //buttons
-        joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', actionJoint1Clockwise, this, 0,0,1,0);
-        joint1_ccw = game.add.button(game.world.centerX + 475, 50, 'joint1_ccw', actionJoint1Ccw, this, 0,0,1,0);
+            //buttons
+            joint1_clockwise = game.add.button(game.world.centerX + 565, 50, 'joint1_clockwise', noAction, this, 0,0,1,0);
+            joint1_ccw = game.add.button(game.world.centerX + 475, 50, 'joint1_ccw', noAction, this, 0,0,1,0);
 
-        joint2_clockwise = game.add.button(game.world.centerX + 565, 150, 'joint2_clockwise', actionJoint2Clockwise, this, 0,0,1,0);
-        joint2_ccw = game.add.button(game.world.centerX + 475, 150, 'joint2_ccw', actionJoint2Ccw, this, 0,0,1,0);
+            joint2_clockwise = game.add.button(game.world.centerX + 565, 150, 'joint2_clockwise', noAction, this, 0,0,1,0);
+            joint2_ccw = game.add.button(game.world.centerX + 475, 150, 'joint2_ccw', noAction, this, 0,0,1,0);
 
-        joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', actionJoint3Clockwise, this,  0,0,1,0);
-        joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', actionJoint3Ccw, this, 0,0,1,0);
+            joint3_clockwise = game.add.button(game.world.centerX + 565, 250, 'joint3_clockwise', noAction, this,  0,0,1,0);
+            joint3_ccw = game.add.button(game.world.centerX + 475, 250, 'joint3_ccw', noAction, this, 0,0,1,0);
 
-        paintButton = game.add.button(game.world.centerX + 400, game.world.height - 175, 'paint', actionPaint, this, 0,0,1,0);
+            paintButton = game.add.button(game.world.centerX + 400, game.world.height - 175, 'paint', noAction, this, 0,0,1,0);
 
-        game.add.button(18, 360, 'eraser', actionErase, this, 0,0,1,0);
+            game.add.button(18, 360, 'eraser', actionErase, this, 0,0,1,0);
 
-        game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
-        game.add.button(140,30, 'color_orange', selectOrange, this, 0,0,1,0);
-        game.add.button(30,140, 'color_yellow', selectYellow, this, 0,0,1,0);
-        game.add.button(140,140, 'color_green', selectGreen, this, 0,0,1,0);
-        game.add.button(30,250, 'color_blue', selectBlue, this, 0,0,1,0);
-        game.add.button(140,250, 'color_purple', selectPurple, this, 0,0,1,0);
+            game.add.button(30, 30, 'color_red', selectRed, this, 0,0,1,0);
+            game.add.button(140,30, 'color_orange', selectOrange, this, 0,0,1,0);
+            game.add.button(30,140, 'color_yellow', selectYellow, this, 0,0,1,0);
+            game.add.button(140,140, 'color_green', selectGreen, this, 0,0,1,0);
+            game.add.button(30,250, 'color_blue', selectBlue, this, 0,0,1,0);
+            game.add.button(140,250, 'color_purple', selectPurple, this, 0,0,1,0);
 
-        game.add.button(35, 520, 'size_small', selectSmall, this, 0, 0, 1, 0);
-        game.add.button(105, 560, 'size_medium', selectMedium, this, 0, 0, 1, 0);
-        game.add.button(35, 600, 'size_large', selectLarge, this, 0, 0, 1, 0);
+            game.add.button(35, 520, 'size_small', selectSmall, this, 0, 0, 1, 0);
+            game.add.button(105, 560, 'size_medium', selectMedium, this, 0, 0, 1, 0);
+            game.add.button(35, 600, 'size_large', selectLarge, this, 0, 0, 1, 0);
+        }
+
 
 
         //loading links
@@ -458,6 +544,20 @@
         //NEED TO BE UPDATED SO WE DON'T LOSE TRACK
         xPos = endEffectorX
         yPos = endEffectorY
+
+        if(!isMaster){
+            console.log('checking for update');
+
+            socket.on('update_vars', function(data){
+
+                console.log('updating world variables from master');
+
+                angle1 = data.angle1;
+                angle2 = data.angle2;
+                angle3 = data.angle3;
+            });
+        }
+
     }
 
     //needed for debugging info
@@ -591,4 +691,10 @@
         var success = inverseKinSolver(xPos, yPos);
         if(!success)
             yPos = tempY;
+    }
+
+    function noAction(){
+        console.log("angle 1: " + angle1);
+        console.log("angle 2: " + angle2);
+        console.log("angle 3: " + angle3);
     }
