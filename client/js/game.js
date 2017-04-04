@@ -251,10 +251,23 @@
             console.log("emitting data to slave");
             socket.emit('world data', data);
         }
+		/*else {
+            console.log('checking for update');
+
+            socket.on('update_vars', function(data){
+
+                console.log('updating world variables from master');
+
+                angle1 = data.angle1;
+                angle2 = data.angle2;
+                angle3 = data.angle3;
+            });
+        }*/
 
     }
 
-    function intitialize_socket(){
+    function initialize_socket(){
+		console.log("In initialize_socket");
         socket = io.connect();
 
         socket.emit('join', function(msg){
@@ -277,7 +290,7 @@
 
     window.socket = null;
     
-    intitialize_socket();
+    initialize_socket();
 
     console.log("Is Master is " + isMaster);
 
@@ -415,10 +428,10 @@
             game.add.text(game.world.centerX + 520, game.world.height - 250, "+Y", { font: "24px Arial", fill: "#7810B7", align: "center" });
 
             //buttons
-            game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', posX_WMCF, this, 0, 0, 1, 0);
-            posY_WMC = game.add.button(game.world.centerX + 540,  game.world.height - 170, 'slow', posY_WMCF, this, 0, 0, 1, 0);
-            negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', negX_WMCF, this, 0, 0, 1, 0);
-            negY_WMC = game.add.button(game.world.centerX + 390,  game.world.height - 215, 'slow', negY_WMCF, this, 0, 0, 1, 0);
+            game.add.button(game.world.centerX + 470,  game.world.height - 320, 'slow', noAction, this, 0, 0, 1, 0);
+            posY_WMC = game.add.button(game.world.centerX + 540,  game.world.height - 170, 'slow', noAction, this, 0, 0, 1, 0);
+            negX_WMC = game.add.button(game.world.centerX + 400,  game.world.height - 290, 'slow', noAction, this, 0, 0, 1, 0);
+            negY_WMC = game.add.button(game.world.centerX + 390,  game.world.height - 215, 'slow', noAction, this, 0, 0, 1, 0);
 
             //flip these buttons
             negX_WMC.anchor.setTo(0.5, 0.5);
@@ -555,7 +568,13 @@
                 angle1 = data.angle1;
                 angle2 = data.angle2;
                 angle3 = data.angle3;
+				update_sprites();
             });
+        }
+		else {
+			var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
+            console.log("emitting data to slave");
+            socket.emit('world data', data);
         }
 
     }
@@ -578,22 +597,22 @@
     }
 
     function actionJoint2Clockwise () {
-        angle2+= rotationSpeed;
+        angle2 += rotationSpeed;
         updateSprites();
     }
 
     function actionJoint2Ccw () {
-        angle2-= rotationSpeed;
+        angle2 -= rotationSpeed;
         updateSprites();
     }
 
     function actionJoint3Clockwise () {
-        angle3+= rotationSpeed;
+        angle3 += rotationSpeed;
         updateSprites();
     }
 
     function actionJoint3Ccw () {
-        angle3-= rotationSpeed;
+        angle3 -= rotationSpeed;
         updateSprites();
     }
 
