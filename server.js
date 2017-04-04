@@ -25,6 +25,7 @@ initialize();
 
 //initialize server data, and set event handlers
 function initialize(){
+	console.log("initialize called");
 	var sAngle1 =-90;
 	var sAngle2 =0;
 	var sAngle3 =0;
@@ -38,16 +39,17 @@ function initialize(){
 		socket.on("newClient", newClient);
 		socket.on("disconnect", clientDisconnect);
 		socket.on("syncData", syncData);
-	}
+	});
 }
 
 function newClient(){
+	console.log("newClient called");
 	clientCount+=1;
 	//if first client, it is now master
 	masterBool = (clientCount == 1);
 	dataPacket[3] = masterBool;
 	//emit dataSync to client with current initialization
-	this.emit("syncData", dataPacket);
+	this.emit("newClient");
 }
 
 function clientDisconnect(){
@@ -61,10 +63,11 @@ function clientDisconnect(){
 }
 
 function syncData(data){
+	console.log("syncData called");
 	//sync server data with incoming client data
 	dataPacket = data;
 	//emit server data to both clients
-	this.broadcast.emit("syncData", dataPacket);
+	this.emit("syncData", dataPacket);
 }
 
 http.listen(3000, function(){
