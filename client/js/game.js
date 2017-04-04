@@ -69,6 +69,10 @@ var Paintcolor;
 var PaintSize = 10;
 var eraseToggle = false;
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 //-----------------------------------------------------------------------------
 //Kinematics Functions
 //-----------------------------------------------------------------------------
@@ -274,7 +278,7 @@ async function syncData(data){
     console.log("syncData called");
 		console.log("masterBool is " + masterBool);
 		if(delayGlob){
-			//await sleep(2000); //delay 2 seconds
+			await sleep(2000); //delay 2 seconds
 		}
 		//sync global angles for this client
 		for(var i =0; i < data.length;i++){
@@ -318,6 +322,8 @@ function preload() {
 
 	game.load.spritesheet('paint', 'assets/Paint.png',250,250,2);
 	game.load.spritesheet('eraser', 'assets/eraser.png',234,78,1);
+
+	game.load.spritesheet('delay', 'assets/delay.png', 100, 100, 2);
 
 	//colors
 	game.load.spritesheet('color_red','assets/colors/red.png',100,100,2);
@@ -420,6 +426,8 @@ function create() {
 		game.add.button(35, 520, 'size_small', selectSmall, this, 0, 0, 1, 0);
 		game.add.button(105, 560, 'size_medium', selectMedium, this, 0, 0, 1, 0);
 		game.add.button(35, 600, 'size_large', selectLarge, this, 0, 0, 1, 0);
+
+		game.add.button(game.world.centerX + 150, 0, 'delay', toggleDelay, this, 0, 0, 1, 0);
 	}
 	else {
 		//Rotation speed
@@ -734,4 +742,9 @@ function emitOnPress(){
         console.log("Emitting data to server");
         socket.emit("syncData", dataGlob);
     }
+}
+
+function toggleDelay(){
+	delayGlob = !delayGlob;
+	console.log('Delay boolean is now: ' + delayGlob);
 }
