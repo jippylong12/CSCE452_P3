@@ -6,7 +6,7 @@
 var socket;
 var masterBool = false;
 var delayGlob = false;
-var dataGlob = [-1,-1,-1,false, false];
+var dataGlob;
 
 //controls
 var cursors;
@@ -245,13 +245,6 @@ function updateSprites(){
 	game.world.bringToTop(link2);
 	game.world.bringToTop(link3);
 
-	var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
-
-	if(masterBool) {
-		console.log("Emitting data to server");
-		socket.emit("syncData", data);
-	}
-
 }
 
 function initializeSocket(){
@@ -266,8 +259,9 @@ function initializeSocket(){
 	//emit ID? NOTE i dont think we need to do!
 }
 
-function newClient(){
+function newClient(mBool){
 	console.log("newClient called");
+	masterBool = mBool;
 	console.log("Connected to server as "+masterBool);
 	socket.emit("syncData", dataGlob);
 }
@@ -278,27 +272,22 @@ function clientDisconnect(){
 
 async function syncData(data){
     console.log("syncData called");
-	if(data.length != 5){ //NOTE:: will probably need to change when we add paint stuffs
-		console.log("ERROR:: data received from server was not correct length!");
-		//send initial data to server
-		var initData = [-90,0,0,false,false];
-		socket.emit("dataSync", initData);
-	}
-	else{
-
+		console.log("masterBool is " + masterBool);
 		if(delayGlob){
 			await sleep(2000); //delay 2 seconds
 		}
 		//sync global angles for this client
+		for(var i =0; i < data.length;i++){
+			console.log(data[i]);
+		}
 		angle1 = data[0];
 		angle2 = data[1];
 		angle3 = data[2];
-		masterBool = data[3];
+		//masterBool = data[3];
 		delayGlob = data[4];
-		
+        console.log("masterBool is now" + masterBool);
 		//then update sprites
 		updateSprites();
-	}
 }
 //-----------------------------------------------------------------------------
 //Phaser Game Functionality
@@ -586,31 +575,37 @@ function render() {}
 function actionJoint1Clockwise () {
 	angle1 += rotationSpeed;
 	updateSprites();
+    emitOnPress();
 }
 
 function actionJoint1Ccw () {
 	angle1 -= rotationSpeed;
 	updateSprites();
+    emitOnPress();
 }
 
 function actionJoint2Clockwise () {
 	angle2 += rotationSpeed;
 	updateSprites();
+    emitOnPress();
 }
 
 function actionJoint2Ccw () {
 	angle2 -= rotationSpeed;
 	updateSprites();
+    emitOnPress();
 }
 
 function actionJoint3Clockwise () {
 	angle3 += rotationSpeed;
 	updateSprites();
+    emitOnPress();
 }
 
 function actionJoint3Ccw () {
 	angle3 -= rotationSpeed;
 	updateSprites();
+    emitOnPress();
 }
 
 function actionPaint(){
@@ -618,6 +613,7 @@ function actionPaint(){
 	paintToggle = !paintToggle;
 	// ensure erase function is off
 	eraseToggle = false;
+    emitOnPress();
 }
 
 function actionErase(){
@@ -625,38 +621,48 @@ function actionErase(){
 	eraseToggle = !eraseToggle;
 	// ensure paint function is off
 	paintToggle = false;
+    emitOnPress();
 }
 
 
 function selectRed(){
 	Paintcolor = 0xFF0000;
+    emitOnPress();
 }
 function selectOrange(){
 	Paintcolor = 0xFF6A00;
+    emitOnPress();
 }
 function selectYellow(){
 	Paintcolor = 0xFFD800;
+    emitOnPress();
 }
 function selectGreen(){
 	Paintcolor = 0x007F0E;
+    emitOnPress();
 }
 function selectBlue(){
 	Paintcolor = 0x0026FF;
+    emitOnPress();
 }
 function selectPurple(){
 	Paintcolor = 0x57007F;
+    emitOnPress();
 }
 
 
 
 function selectSmall(){
 	PaintSize = 5;
+    emitOnPress();
 }
 function selectMedium(){
 	PaintSize = 10;
+    emitOnPress();
 }
 function selectLarge(){
 	PaintSize = 20;
+    emitOnPress();
 }
 
 
@@ -664,16 +670,19 @@ function selectLarge(){
 function speedSlow(){
 	rotationSpeed = 1;
 	incAmt = 3;
+    emitOnPress();
 }
 
 function speedMedium(){
 	rotationSpeed = 3;
 	incAmt = 8;
+    emitOnPress();
 }
 
 function speedFast(){
 	rotationSpeed = 10;
 	incAmt = 12;
+    emitOnPress();
 }
 
 
@@ -683,6 +692,7 @@ function posX_WMCF(){
 	var success = inverseKinSolver(xPos, yPos);
 	if(!success)
 		xPos = tempX;
+    emitOnPress();
 }
 
 function posY_WMCF(){
@@ -691,6 +701,7 @@ function posY_WMCF(){
 	var success = inverseKinSolver(xPos, yPos);
 	if(!success)
 		yPos = tempY;
+    emitOnPress();
 }
 
 function negX_WMCF(){
@@ -699,6 +710,7 @@ function negX_WMCF(){
 	var success = inverseKinSolver(xPos, yPos);
 	if(!success)
 		xPos = tempX;
+    emitOnPress();
 }
 
 function negY_WMCF(){
@@ -707,10 +719,17 @@ function negY_WMCF(){
 	var success = inverseKinSolver(xPos, yPos);
 	if(!success)
 		yPos = tempY;
+    emitOnPress();
 }
 
 function noAction(){
-	console.log("angle 1: " + angle1);
-	console.log("angle 2: " + angle2);
-	console.log("angle 3: " + angle3);
+	console.log("noACTION");
+}
+
+function emitOnPress(){
+    if(masterBool) {
+        dataGlob = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
+        console.log("Emitting data to server");
+        socket.emit("syncData", dataGlob);
+    }
 }
