@@ -539,28 +539,35 @@
         xPos = endEffectorX
         yPos = endEffectorY
     }
-
+	
+	
+	int numFrames = 0;
     //needed for compilation, functionality moved to button and updateSprites() function
     function update() {
-        //NEED TO BE UPDATED SO WE DON'T LOSE TRACK
-        xPos = endEffectorX
-        yPos = endEffectorY
+		if(numFrames < 20){
+			//NEED TO BE UPDATED SO WE DON'T LOSE TRACK
+			xPos = endEffectorX
+			yPos = endEffectorY
 
-		socket.on('update_vars', function(data){
+			socket.on('update_vars', function(data){
 
-			console.log('updating world variables from master');
+				console.log('updating world variables from master');
 
-			angle1 = data.angle1;
-			angle2 = data.angle2;
-			angle3 = data.angle3;
-			updateSprites();
-		});
-		if(isMaster){
-			var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
-            console.log("emitting data to slave");
-            socket.emit('world data', data);
-        }
-
+				angle1 = data.angle1;
+				angle2 = data.angle2;
+				angle3 = data.angle3;
+				updateSprites();
+			});
+			if(isMaster){
+				var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
+				console.log("emitting data to slave");
+				socket.emit('world data', data);
+			}
+			numFrames++
+		}
+		else{
+			numFrames = 0;
+		}
     }
 
     //needed for debugging info
