@@ -1,5 +1,5 @@
 # P3
-For the 2nd project of CSCE452
+For the 3rd project of CSCE452
 
 TO RUN LOCALLY:
 -Make sure you have node.js installed by following this tutorial:
@@ -7,13 +7,13 @@ http://blog.teamtreehouse.com/install-node-js-npm-windows
 -Install the appropriate libraries with the following commands:
 npm install express
 npm install engine.io
-npm install eureca.io
+npm install socket.io
 -Download entire project as zip from github
 -Unzip file into local directory
 -Navigate to your directory you unzipeed it to and run the following command:
 node server.js
 -Open a browser and navigate to:
-http://localhost:8000/
+http://localhost:3000/
 -Then open another browser and navigate to the same address. 
 The first client connected is the "master" and the second is the slave
 
