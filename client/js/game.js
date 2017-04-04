@@ -251,18 +251,6 @@
             console.log("emitting data to slave");
             socket.emit('world data', data);
         }
-		/*else {
-            console.log('checking for update');
-
-            socket.on('update_vars', function(data){
-
-                console.log('updating world variables from master');
-
-                angle1 = data.angle1;
-                angle2 = data.angle2;
-                angle3 = data.angle3;
-            });
-        }*/
 
     }
 
@@ -558,20 +546,16 @@
         xPos = endEffectorX
         yPos = endEffectorY
 
-        if(!isMaster){
-            console.log('checking for update');
+		socket.on('update_vars', function(data){
 
-            socket.on('update_vars', function(data){
+			console.log('updating world variables from master');
 
-                console.log('updating world variables from master');
-
-                angle1 = data.angle1;
-                angle2 = data.angle2;
-                angle3 = data.angle3;
-				update_sprites();
-            });
-        }
-		else {
+			angle1 = data.angle1;
+			angle2 = data.angle2;
+			angle3 = data.angle3;
+			updateSprites();
+		});
+		if(isMaster){
 			var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
             console.log("emitting data to slave");
             socket.emit('world data', data);
