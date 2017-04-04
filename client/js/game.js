@@ -2,9 +2,10 @@
     //Global Variables
     //-----------------------------------------------------------------------------
 
-   //TDP STUFF
+   //TCP STUFF
     var socket;
     var masterBool = false;
+	var delayGlob = false;
     //controls
     var cursors;
 
@@ -247,28 +248,52 @@
 
         var data = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
 
-        if(isMaster) {
-            console.log("emitting data to slave");
-            socket.emit('world data', data);
+        if(masterBool) {
+            console.log("Emitting data to server");
+            socket.emit("syncData", data);
         }
 
     }
 
-    function initialize_socket(){
-		console.log("In initialize_socket");
+    function initializeSocket(){
         socket = io.connect();
-
-        socket.emit('join', function(msg){
-           isMaster = msg;
-
-           console.log('master boolean: ' + isMaster);
-        });
-
-        socket.on('master', function(master){
-            console.log("received master is: " + master);
-            isMaster = master;
-        })
+		//set event handlers
+		socket.on("newClient", newClient);
+		socket.on("disconnect", clientDisconnect);
+		socket.on("syncData", syncData);
+		//emit ID? NOTE i dont think we need to do!
     }
+	
+	function newClient(){
+		console.log("Connected to server");
+	}
+	
+	function clientDisconnect(){
+		console.log("Disconnected from server...");
+	}
+	
+	async function(data){
+		if(data.length != 5){ //NOTE:: will probably need to change when we add paint stuffs
+			console.log("ERROR:: data received from server was not correct length!");
+			//send initial data to server
+			var initData = [-90,0,0,false,false];
+			socket.emit("dataSync", initData);
+		}
+		else{
+			if(delayGlob){
+				await sleep(2000); //delay 2 seconds
+			}
+			//sync global angles for this client
+			angle1 = data[0];
+			angle2 = data[1];
+			angle3 = data[2];
+			masterBool = data[3];
+			delayGlob = data[4];
+			
+			//then update sprites
+			updateSprites();
+		}
+	}
     //-----------------------------------------------------------------------------
     //Phaser Game Functionality
     //-----------------------------------------------------------------------------
@@ -278,7 +303,7 @@
 
     window.socket = null;
     
-    initialize_socket();
+    initializeSocket();
 
     console.log("Is Master is " + isMaster);
 

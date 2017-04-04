@@ -9,6 +9,8 @@ var io = require('socket.io')(http);
 var clients = {};
 var clientCount = 0;
 var masterBool = false;
+var dataPacket;
+
 app.use(express.static(path.join(__dirname, '/client')));
 
 // viewed at http://localhost:8080
@@ -19,46 +21,53 @@ app.get('/', function(req, res) {
 // store game variables
 var world_data;
 
-io.on('connection', function(socket){
+initialize();
 
-    socket.on('join', function(data){
-       console.log("Client joined");
+//initialize server data, and set event handlers
+function initialize(){
+	var sAngle1 =-90;
+	var sAngle2 =0;
+	var sAngle3 =0;
+	var delay = false;
+	dataPacket = [sAngle1, sAngle2, sAngle3, masterBool, delay];
+	
+	//set event handlers
+	io.on("connection", function(socket){
+		console.log("ClientID: "+ socket.id+" has joined.");
+		//mapping names to functions called on server and client
+		socket.on("newClient", newClient);
+		socket.on("disconnect", clientDisconnect);
+		socket.on("syncData", syncData);
+	}
+}
 
-        clientCount+=1;
+function newClient(){
+	clientCount+=1;
+	//if first client, it is now master
+	masterBool = (clientCount == 1);
+	dataPacket[3] = masterBool;
+	//emit dataSync to client with current initialization
+	this.emit("syncData", dataPacket);
+}
 
-        //IF THIS IS THE FIRST IT NOW BECOMES THE MASTER
-        masterBool = (clientCount == 1);
+function clientDisconnect(){
+	console.log("ClientID: "+this.id+" has disconnected");
+	if(clientCount > 0){
+		clientCount--;
+	}
+	else{
+		console.log("Negative clients... ignoring");
+	}
+}
 
-        clients[socket.id] = masterBool;
-
-        console.log("masterBool = " + masterBool);
-
-        socket.emit('master', masterBool);
-
-    });
-    socket.on('disconnect', function(){
-        console.log('user disconnected');
-        clientCount-=1;
-        delete clients[socket.id];
-        console.log('clientCount: ' + clientCount);
-    });
-    socket.on('angles', function(msg){
-        console.log('message: ' + msg);
-    });
-    socket.on('world data', function(data){
-        console.log("angle 1: " + data.angle1);
-        console.log("angle 2: " + data.angle2);
-        console.log("angle 3: " + data.angle3);
-
-        world_data = data;
-
-        socket.emit('update_vars', world_data);
-    });
-
-
-
-});
+function syncData(data){
+	//sync server data with incoming client data
+	dataPacket = data;
+	//emit server data to both clients
+	this.broadcast.emit("syncData", dataPacket);
+}
 
 http.listen(3000, function(){
+	//local listen for now...
     console.log('listening on *:3000');
 });
