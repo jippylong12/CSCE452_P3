@@ -30,7 +30,7 @@ function defaultVal(){
     var delay = false;
     var paint = false;
     var rotationSpeed = 1;
-    var paintColor = 0xFF0000;
+    var paintColor = 0x000000;
     dataPacket = [sAngle1, sAngle2, sAngle3 , delay, paint, rotationSpeed, paintColor];
 }
 //initialize server data, and set event handlers
@@ -81,7 +81,7 @@ function syncData(data){
         //sync server data with incoming client data
         dataPacket = data;
         //emit server data to both clients
-        this.emit("syncData", dataPacket);
+        this.broadcast.emit("syncData", dataPacket);
     }
 }
 

@@ -274,7 +274,7 @@ async function syncData(data){
     console.log("syncData called");
 		console.log("masterBool is " + masterBool);
 		if(delayGlob){
-			await sleep(2000); //delay 2 seconds
+			//await sleep(2000); //delay 2 seconds
 		}
 		//sync global angles for this client
 		for(var i =0; i < data.length;i++){
@@ -283,8 +283,10 @@ async function syncData(data){
 		angle1 = data[0];
 		angle2 = data[1];
 		angle3 = data[2];
-		//masterBool = data[3];
-		delayGlob = data[4];
+		delayGlob = data[3];
+		paintToggle = data[4];
+		rotationSpeed = data[5];
+		Paintcolor = data[6];
         console.log("masterBool is now" + masterBool);
 		//then update sprites
 		updateSprites();
@@ -728,7 +730,7 @@ function noAction(){
 
 function emitOnPress(){
     if(masterBool) {
-        dataGlob = {angle1: angle1, angle2: angle2, angle3: angle3, paint: paintToggle, rotation: rotationSpeed, color: Paintcolor };
+        dataGlob = [angle1, angle2, angle3,delayGlob, paintToggle,rotationSpeed,Paintcolor];
         console.log("Emitting data to server");
         socket.emit("syncData", dataGlob);
     }
